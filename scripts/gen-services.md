@@ -24,7 +24,6 @@ kabu gen <input-dir> --request-import <path> [--output-dir <path>] [--rewrite-pr
 - `--request-import`：必填。生成文件中 `request` 的导入路径（例如 `@/request` 或 `../utils/request`）。
 - `--output-dir`：可选。生成目录；不传时默认等于 `input-dir`。
 - `--rewrite-prefix`：可选。接口路径前缀重写规则，格式 `<from=to>`，可重复传入多条规则，按传入顺序匹配第一个命中的规则。
-- `--services-dir`：兼容旧参数，等价于同时设置 `input-dir` 和 `output-dir` 为同一个目录。
 
 ## 生成规则
 

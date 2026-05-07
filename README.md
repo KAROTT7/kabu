@@ -50,7 +50,6 @@ kabu gen [inputDir] --request-import <path> [options]
 
 - `--input-dir <dir>`：递归扫描 `*.openapi.json` 的输入目录
 - `--output-dir <dir>`：生成 `.ts` 文件的输出目录，默认等于 `inputDir`
-- `--services-dir <dir>`：兼容旧参数，输入和输出使用同一个目录
 - `--request-import <path>`：生成文件中 request 封装的导入路径
 - `--rewrite-prefix <from=to>`：有序请求路径重写规则，可重复传入
 
