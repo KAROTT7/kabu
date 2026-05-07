@@ -1,0 +1,42 @@
+export type Logger = Pick<Console, 'log'> | false
+
+export interface RewriteRule {
+  from: string
+  to: string
+}
+
+export type RewriteInput = string | [unknown, unknown] | { from?: unknown; to?: unknown }
+
+export interface GenerateServicesOptions {
+  pathRewrites?: RewriteRule[]
+  inputDir?: string
+  outputDir?: string
+  requestImport?: string
+  rewritePrefix?: RewriteInput | RewriteInput[]
+  root?: string
+  logger?: Logger
+}
+
+export interface NormalizedGenerateOptions {
+  inputDir: string
+  outputDir: string
+  requestImport: string
+  pathRewrites: RewriteRule[]
+  logger?: Logger
+}
+
+export interface GenerateResult {
+  inputDir: string
+  outputDir: string
+  files: Array<{ input: string; output: string }>
+}
+
+export interface TsContext {
+  collectRef(name: string): void
+}
+
+export type SchemaMap = Record<string, any>
+
+export interface SchemaRenderer {
+  schemaToTs(schema: any, context: TsContext): string
+}

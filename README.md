@@ -66,7 +66,7 @@ kabu gen ./openapi --request-import '@/request' --rewrite-prefix /a/b=/c/a/c --r
 ```text
 src/bin/kabu.ts             CLI 入口
 src/commands/gen.ts         cac 命令注册
-scripts/gen-services.ts     OpenAPI services 生成器
+src/gen/                    OpenAPI 生成核心模块
 docs/strategy.md            生成规则
 docs/examples.md            生成案例
 example/                    可复现完整模拟案例

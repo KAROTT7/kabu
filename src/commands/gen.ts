@@ -1,5 +1,5 @@
 import type { CAC } from 'cac'
-import { generateServices } from '../../scripts/gen-services.js'
+import { generateServices } from '../gen/index.js'
 
 interface GenCommandOptions {
   inputDir?: string

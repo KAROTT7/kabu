@@ -10,12 +10,11 @@
     "dist",
     "docs",
     "example",
-    "scripts",
     "README.md"
   ],
   "scripts": {
     "build": "tsc",
-    "postbuild": "chmod +x dist/src/bin/kabu.js dist/scripts/gen-services.js",
+    "postbuild": "chmod +x dist/src/bin/kabu.js",
     "dev": "pnpm build && node ./dist/src/bin/kabu.js",
     "start": "node ./dist/src/bin/kabu.js",
     "check": "tsc --noEmit && tsc -p tsconfig.example.json",
