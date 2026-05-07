@@ -1,0 +1,820 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "模拟商品服务",
+    "version": "1.0.0",
+    "description": "用于覆盖 kabu 生成策略的模拟 OpenAPI 文档"
+  },
+  "paths": {
+    "/product/catalog/config": {
+      "get": {
+        "summary": "获取商品配置",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultProductConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/catalog/sync": {
+      "post": {
+        "summary": "同步商品目录",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultSyncTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/page": {
+      "get": {
+        "summary": "分页查询商品",
+        "parameters": [
+          {
+            "name": "pageNo",
+            "in": "query",
+            "description": "页码",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "商品状态",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ProductStatus"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "商品名称或编码",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultProductPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/{id}": {
+      "get": {
+        "summary": "查询商品详情",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "商品 ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultProductDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除商品并记录原因",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "商品 ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultBoolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/{id}/logs": {
+      "get": {
+        "summary": "查询商品操作日志",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "商品 ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "description": "日志等级",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["info", "warning", "error"]
+            }
+          },
+          {
+            "name": "operator",
+            "in": "query",
+            "description": "操作人",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultProductLogs"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/create": {
+      "post": {
+        "summary": "创建商品",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultProductRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/export": {
+      "post": {
+        "summary": "导出商品",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "description": "导出格式",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["xlsx", "csv"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultExportTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/{id}/price": {
+      "put": {
+        "summary": "修改商品价格",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "商品 ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductPriceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultProductDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/{id}/status": {
+      "patch": {
+        "summary": "修改商品状态",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "商品 ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "notify",
+            "in": "query",
+            "description": "是否通知订阅用户",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultProductDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/item/delete": {
+      "delete": {
+        "summary": "按查询参数删除商品",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "商品 ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "silent",
+            "in": "query",
+            "description": "是否静默删除",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultBoolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProductStatus": {
+        "type": "string",
+        "description": "商品状态",
+        "enum": ["draft", "on_sale", "off_sale", "archived"]
+      },
+      "ProductCategoryType": {
+        "type": "string",
+        "description": "商品类型",
+        "enum": ["physical", "virtual", "bundle"]
+      },
+      "ProductConfig": {
+        "type": "object",
+        "required": ["enabled", "defaultCurrency", "supportTypes"],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "是否开启商品模块"
+          },
+          "defaultCurrency": {
+            "type": "string",
+            "description": "默认货币"
+          },
+          "supportTypes": {
+            "type": "array",
+            "description": "支持的商品类型",
+            "items": {
+              "$ref": "#/components/schemas/ProductCategoryType"
+            }
+          }
+        }
+      },
+      "SyncTask": {
+        "type": "object",
+        "required": ["taskId", "accepted"],
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "同步任务 ID"
+          },
+          "accepted": {
+            "type": "boolean",
+            "description": "是否已受理"
+          }
+        }
+      },
+      "ProductRecord": {
+        "type": "object",
+        "required": ["id", "spuCode", "name", "categoryType", "status", "salePrice", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "商品 ID"
+          },
+          "spuCode": {
+            "type": "string",
+            "description": "SPU 编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "商品名称"
+          },
+          "categoryType": {
+            "$ref": "#/components/schemas/ProductCategoryType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
+          "salePrice": {
+            "type": "number",
+            "description": "销售价"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "archivedAt": {
+            "type": ["string", "null"],
+            "description": "归档时间"
+          }
+        }
+      },
+      "ProductPage": {
+        "type": "object",
+        "required": ["total", "list"],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "总数"
+          },
+          "list": {
+            "type": "array",
+            "description": "商品列表",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecord"
+            }
+          }
+        }
+      },
+      "ProductDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductRecord"
+          },
+          {
+            "type": "object",
+            "required": ["description", "skus"],
+            "properties": {
+              "description": {
+                "type": "string",
+                "description": "商品描述"
+              },
+              "attributes": {
+                "type": "object",
+                "description": "商品属性",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "skus": {
+                "type": "array",
+                "description": "SKU 列表",
+                "items": {
+                  "$ref": "#/components/schemas/ProductSku"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ProductSku": {
+        "type": "object",
+        "required": ["skuId", "skuName", "stock", "price"],
+        "properties": {
+          "skuId": {
+            "type": "integer",
+            "description": "SKU ID"
+          },
+          "skuName": {
+            "type": "string",
+            "description": "SKU 名称"
+          },
+          "stock": {
+            "type": "integer",
+            "description": "库存"
+          },
+          "price": {
+            "type": "number",
+            "description": "SKU 价格"
+          }
+        }
+      },
+      "ProductLog": {
+        "type": "object",
+        "required": ["id", "level", "content", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "日志 ID"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["info", "warning", "error"],
+            "description": "日志等级"
+          },
+          "content": {
+            "type": "string",
+            "description": "日志内容"
+          },
+          "operator": {
+            "type": "string",
+            "description": "操作人"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间"
+          }
+        }
+      },
+      "CreateProductRequest": {
+        "type": "object",
+        "required": ["spuCode", "name", "categoryType", "salePrice", "skus"],
+        "properties": {
+          "spuCode": {
+            "type": "string",
+            "description": "SPU 编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "商品名称"
+          },
+          "categoryType": {
+            "$ref": "#/components/schemas/ProductCategoryType"
+          },
+          "salePrice": {
+            "type": "number",
+            "description": "销售价"
+          },
+          "skus": {
+            "type": "array",
+            "description": "SKU 列表",
+            "items": {
+              "$ref": "#/components/schemas/CreateProductSku"
+            }
+          }
+        }
+      },
+      "CreateProductSku": {
+        "type": "object",
+        "required": ["skuName", "stock", "price"],
+        "properties": {
+          "skuName": {
+            "type": "string",
+            "description": "SKU 名称"
+          },
+          "stock": {
+            "type": "integer",
+            "description": "库存"
+          },
+          "price": {
+            "type": "number",
+            "description": "SKU 价格"
+          }
+        }
+      },
+      "ExportProductRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
+          "createdAtRange": {
+            "type": "array",
+            "description": "创建时间范围",
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "ExportTask": {
+        "type": "object",
+        "required": ["taskId", "downloadUrl"],
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "导出任务 ID"
+          },
+          "downloadUrl": {
+            "type": "string",
+            "description": "下载地址"
+          }
+        }
+      },
+      "UpdateProductPriceRequest": {
+        "type": "object",
+        "required": ["salePrice"],
+        "properties": {
+          "salePrice": {
+            "type": "number",
+            "description": "销售价"
+          },
+          "marketPrice": {
+            "type": "number",
+            "description": "市场价"
+          }
+        }
+      },
+      "UpdateProductStatusRequest": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
+          "remark": {
+            "type": "string",
+            "description": "操作备注"
+          }
+        }
+      },
+      "DeleteProductRequest": {
+        "type": "object",
+        "required": ["reason"],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "删除原因"
+          }
+        }
+      },
+      "ApiResultProductConfig": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductConfig"
+          }
+        }
+      },
+      "ApiResultSyncTask": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SyncTask"
+          }
+        }
+      },
+      "ApiResultProductPage": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductPage"
+          }
+        }
+      },
+      "ApiResultProductDetail": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductDetail"
+          }
+        }
+      },
+      "ApiResultProductLogs": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductLog"
+            }
+          }
+        }
+      },
+      "ApiResultProductRecord": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductRecord"
+          }
+        }
+      },
+      "ApiResultExportTask": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExportTask"
+          }
+        }
+      },
+      "ApiResultBoolean": {
+        "type": "object",
+        "required": ["code", "message", "data"],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

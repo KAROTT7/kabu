@@ -1,0 +1,44 @@
+{
+  "name": "kabu",
+  "version": "0.1.0",
+  "description": "Generate TypeScript service functions from OpenAPI documents.",
+  "type": "module",
+  "bin": {
+    "kabu": "./dist/src/bin/kabu.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "example",
+    "scripts",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "chmod +x dist/src/bin/kabu.js dist/scripts/gen-services.js",
+    "dev": "pnpm build && node ./dist/src/bin/kabu.js",
+    "start": "node ./dist/src/bin/kabu.js",
+    "check": "tsc --noEmit && tsc -p tsconfig.example.json",
+    "prepack": "pnpm build"
+  },
+  "keywords": [
+    "cli",
+    "cac",
+    "openapi",
+    "typescript",
+    "services"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "axios": "^1.16.0",
+    "cac": "^6.7.14"
+  },
+  "packageManager": "pnpm@10.18.1",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3"
+  }
+}
