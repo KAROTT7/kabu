@@ -160,14 +160,27 @@ OpenAPI 参数按位置分为：
 
 - 支持 Path Item 级别的公共 `parameters`，也支持 operation 级别的 `parameters`。
 - 如果 Path Item 和 operation 中存在相同 `in + name` 的参数，operation 参数覆盖 Path Item 参数。
-- `path` 参数进入函数第一个参数 `params`，并用于拼接 URL。
-- `query` 参数进入函数第一个参数 `params`，并写入 `AxiosRequestConfig.params`。
+- `path` 参数生成独立入参，入参名优先使用路径模板中的参数名，例如 `{id}` 生成 `id: string | number`，`{userId}` 生成 `userId: string | number`，并用于拼接 URL。
+- `query` 参数进入函数入参 `params`，并写入 `AxiosRequestConfig.params`。
 - `header` 参数不生成，由 axios 拦截器、axios 默认配置或调用方的 `axiosRequestConfig.headers` 处理。
 - `cookie` 参数不生成。
 
-路径参数只用于 URL 模板，不会同时作为查询参数发送。
+生成函数入参里的 `params` 是生成器层面的查询参数对象，只包含 `query` 参数。
 
-如果 OpenAPI 路径中出现 `{id}`，但 operation parameters 没有声明对应 path 参数，生成器会补一个 `string` 类型的必填路径参数。
+axios 配置中的 `AxiosRequestConfig.params` 只表示查询参数，会被 axios 序列化到 URL 的 `?` 后面，不会替换路径模板。路径参数只用于拼接 URL，不会同时作为查询参数发送。
+
+例如 `GET /member/user/{id}/orders?pageNo` 会生成：
+
+```ts
+request.get(`/member/user/${id}/orders`, {
+  ...axiosRequestConfig,
+  params
+})
+```
+
+这里的 `id` 是路径参数，用于替换 URL；函数入参 `params` 会整体写入 `AxiosRequestConfig.params`，最终变成 `?pageNo=...`。
+
+如果 OpenAPI 路径中出现 `{id}`，但 operation parameters 没有声明对应 path 参数，生成器会补一个必填路径参数，并生成 `id: string | number`。
 
 ## 类型命名
 
@@ -175,7 +188,7 @@ OpenAPI 参数按位置分为：
 
 | 类型角色 | 生成命名 | 含义 |
 | --- | --- | --- |
-| 请求参数类型 | `<FunctionName>Params` | `path` 和 `query` 参数对象 |
+| 请求参数类型 | `<FunctionName>Params` | `query` 参数对象 |
 | 请求体类型 | `<FunctionName>Body` | 请求体 data |
 | 响应数据类型 | `<FunctionName>Response` | 响应 data，也就是业务响应值 |
 
@@ -348,18 +361,20 @@ request.post<ResponseData, ResponseData, RequestBody>(url, data, config)
 
 ## 方法矩阵
 
+下表是调用形态示意。路径参数用独立入参 `id: string | number` 表示；查询参数仍使用 `params` 对象。
+
 | OpenAPI 形态 | 生成函数形态 | axios 调用形态 |
 | --- | --- | --- |
 | 无参数、无请求体 | `(axiosRequestConfig?)` | `request.get(url, config)` 或 `request.post(url, undefined, config)` |
 | 只有查询参数 | `(params, axiosRequestConfig?)` | `request.get(url, { ...config, params })` |
-| 只有路径参数 | `(params, axiosRequestConfig?)` | `request.get(urlWithParams, config)` |
-| 路径参数 + 查询参数 | `(params, axiosRequestConfig?)` | `request.get(urlWithParams, { ...config, params: queryOnly })` |
+| 只有路径参数 | `(id: string \| number, axiosRequestConfig?)` | `request.get(urlWithId, config)` |
+| 路径参数 + 查询参数 | `(id: string \| number, params, axiosRequestConfig?)` | `request.get(urlWithId, { ...config, params })` |
 | 只有请求体 | `(data, axiosRequestConfig?)` | `request.post(url, data, config)` |
 | 查询参数 + 请求体 | `(params, data, axiosRequestConfig?)` | `request.post(url, data, { ...config, params })` |
-| 路径参数 + 请求体 | `(params, data, axiosRequestConfig?)` | `request.put(urlWithParams, data, config)` |
-| 路径参数 + 查询参数 + 请求体 | `(params, data, axiosRequestConfig?)` | `request.patch(urlWithParams, data, { ...config, params: queryOnly })` |
+| 路径参数 + 请求体 | `(id: string \| number, data, axiosRequestConfig?)` | `request.put(urlWithId, data, config)` |
+| 路径参数 + 查询参数 + 请求体 | `(id: string \| number, params, data, axiosRequestConfig?)` | `request.patch(urlWithId, data, { ...config, params })` |
 | DELETE 携带查询参数 | `(params, axiosRequestConfig?)` | `request.delete(url, { ...config, params })` |
-| DELETE 携带请求体 | `(params, data, axiosRequestConfig?)` | `request.delete(urlWithParams, { ...config, data })` |
+| DELETE 携带请求体 | `(id: string \| number, data, axiosRequestConfig?)` | `request.delete(urlWithId, { ...config, data })` |
 
 ## 覆盖与错误策略
 

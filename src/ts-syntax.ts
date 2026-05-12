@@ -58,10 +58,10 @@ export function objectAccess(objectName: string, key: string): string {
   return isValidTsIdentifier(key) ? `${objectName}.${key}` : `${objectName}[${tsObjectKey(key)}]`
 }
 
-export function pathToTemplateLiteral(url: string, paramsObjectName: string): string {
+export function pathToTemplateLiteral(url: string, pathParamExpressions: Record<string, string>): string {
   const parts = url.split('/').map(segment => {
     const paramName = pathParamName(segment)
-    if (paramName) return `\${${objectAccess(paramsObjectName, paramName)}}`
+    if (paramName) return `\${${pathParamExpressions[paramName] || paramName}}`
     return escapeTemplateLiteralPart(segment)
   })
   return `\`${parts.join('/')}\``

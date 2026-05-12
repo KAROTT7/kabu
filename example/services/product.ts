@@ -163,12 +163,7 @@ export type GetProductItemPageResponse = ProductPage
  * GET /api/product/item/page
  */
 export function getProductItemPage(params: GetProductItemPageParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemPageResponse> {
-  return request.get<GetProductItemPageResponse, GetProductItemPageResponse>(`/api/product/item/page`, { ...axiosRequestConfig, params: { pageNo: params.pageNo, pageSize: params.pageSize, status: params.status, keyword: params.keyword } })
-}
-
-export interface GetProductItemByIdParams {
-  /** 商品 ID */
-  id: number
+  return request.get<GetProductItemPageResponse, GetProductItemPageResponse>(`/api/product/item/page`, { ...axiosRequestConfig, params })
 }
 
 export type GetProductItemByIdResponse = ProductDetail
@@ -177,13 +172,8 @@ export type GetProductItemByIdResponse = ProductDetail
  * 查询商品详情
  * GET /api/product/item/{id}
  */
-export function getProductItemById(params: GetProductItemByIdParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdResponse> {
-  return request.get<GetProductItemByIdResponse, GetProductItemByIdResponse>(`/api/product/item/${params.id}`, axiosRequestConfig)
-}
-
-export interface DeleteProductItemByIdParams {
-  /** 商品 ID */
-  id: number
+export function getProductItemById(id: string | number, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdResponse> {
+  return request.get<GetProductItemByIdResponse, GetProductItemByIdResponse>(`/api/product/item/${id}`, axiosRequestConfig)
 }
 
 export type DeleteProductItemByIdBody = DeleteProductRequest
@@ -194,13 +184,11 @@ export type DeleteProductItemByIdResponse = boolean
  * 删除商品并记录原因
  * DELETE /api/product/item/{id}
  */
-export function deleteProductItemById(params: DeleteProductItemByIdParams, data: DeleteProductItemByIdBody, axiosRequestConfig?: AxiosRequestConfig<DeleteProductItemByIdBody>): Promise<DeleteProductItemByIdResponse> {
-  return request.delete<DeleteProductItemByIdResponse, DeleteProductItemByIdResponse, DeleteProductItemByIdBody>(`/api/product/item/${params.id}`, { ...axiosRequestConfig, data })
+export function deleteProductItemById(id: string | number, data: DeleteProductItemByIdBody, axiosRequestConfig?: AxiosRequestConfig<DeleteProductItemByIdBody>): Promise<DeleteProductItemByIdResponse> {
+  return request.delete<DeleteProductItemByIdResponse, DeleteProductItemByIdResponse, DeleteProductItemByIdBody>(`/api/product/item/${id}`, { ...axiosRequestConfig, data })
 }
 
 export interface GetProductItemByIdLogsParams {
-  /** 商品 ID */
-  id: number
   /** 日志等级 */
   level?: 'info' | 'warning' | 'error'
   /** 操作人 */
@@ -213,8 +201,8 @@ export type GetProductItemByIdLogsResponse = ProductLog[]
  * 查询商品操作日志
  * GET /api/product/item/{id}/logs
  */
-export function getProductItemByIdLogs(params: GetProductItemByIdLogsParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdLogsResponse> {
-  return request.get<GetProductItemByIdLogsResponse, GetProductItemByIdLogsResponse>(`/api/product/item/${params.id}/logs`, { ...axiosRequestConfig, params: { level: params.level, operator: params.operator } })
+export function getProductItemByIdLogs(id: string | number, params: GetProductItemByIdLogsParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdLogsResponse> {
+  return request.get<GetProductItemByIdLogsResponse, GetProductItemByIdLogsResponse>(`/api/product/item/${id}/logs`, { ...axiosRequestConfig, params })
 }
 
 export type PostProductItemCreateBody = CreateProductRequest
@@ -243,12 +231,7 @@ export type PostProductItemExportResponse = ExportTask
  * POST /api/product/item/export
  */
 export function postProductItemExport(params: PostProductItemExportParams, data: PostProductItemExportBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemExportBody>): Promise<PostProductItemExportResponse> {
-  return request.post<PostProductItemExportResponse, PostProductItemExportResponse, PostProductItemExportBody>(`/api/product/item/export`, data, { ...axiosRequestConfig, params: { format: params.format } })
-}
-
-export interface PutProductItemByIdPriceParams {
-  /** 商品 ID */
-  id: number
+  return request.post<PostProductItemExportResponse, PostProductItemExportResponse, PostProductItemExportBody>(`/api/product/item/export`, data, { ...axiosRequestConfig, params })
 }
 
 export type PutProductItemByIdPriceBody = UpdateProductPriceRequest
@@ -259,13 +242,11 @@ export type PutProductItemByIdPriceResponse = ProductDetail
  * 修改商品价格
  * PUT /api/product/item/{id}/price
  */
-export function putProductItemByIdPrice(params: PutProductItemByIdPriceParams, data: PutProductItemByIdPriceBody, axiosRequestConfig?: AxiosRequestConfig<PutProductItemByIdPriceBody>): Promise<PutProductItemByIdPriceResponse> {
-  return request.put<PutProductItemByIdPriceResponse, PutProductItemByIdPriceResponse, PutProductItemByIdPriceBody>(`/api/product/item/${params.id}/price`, data, axiosRequestConfig)
+export function putProductItemByIdPrice(id: string | number, data: PutProductItemByIdPriceBody, axiosRequestConfig?: AxiosRequestConfig<PutProductItemByIdPriceBody>): Promise<PutProductItemByIdPriceResponse> {
+  return request.put<PutProductItemByIdPriceResponse, PutProductItemByIdPriceResponse, PutProductItemByIdPriceBody>(`/api/product/item/${id}/price`, data, axiosRequestConfig)
 }
 
 export interface PatchProductItemByIdStatusParams {
-  /** 商品 ID */
-  id: number
   /** 是否通知订阅用户 */
   notify?: boolean
 }
@@ -278,8 +259,8 @@ export type PatchProductItemByIdStatusResponse = ProductDetail
  * 修改商品状态
  * PATCH /api/product/item/{id}/status
  */
-export function patchProductItemByIdStatus(params: PatchProductItemByIdStatusParams, data: PatchProductItemByIdStatusBody, axiosRequestConfig?: AxiosRequestConfig<PatchProductItemByIdStatusBody>): Promise<PatchProductItemByIdStatusResponse> {
-  return request.patch<PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusBody>(`/api/product/item/${params.id}/status`, data, { ...axiosRequestConfig, params: { notify: params.notify } })
+export function patchProductItemByIdStatus(id: string | number, params: PatchProductItemByIdStatusParams, data: PatchProductItemByIdStatusBody, axiosRequestConfig?: AxiosRequestConfig<PatchProductItemByIdStatusBody>): Promise<PatchProductItemByIdStatusResponse> {
+  return request.patch<PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusBody>(`/api/product/item/${id}/status`, data, { ...axiosRequestConfig, params })
 }
 
 export interface DeleteProductItemDeleteParams {
@@ -296,6 +277,6 @@ export type DeleteProductItemDeleteResponse = boolean
  * DELETE /api/product/item/delete
  */
 export function deleteProductItemDelete(params: DeleteProductItemDeleteParams, axiosRequestConfig?: AxiosRequestConfig): Promise<DeleteProductItemDeleteResponse> {
-  return request.delete<DeleteProductItemDeleteResponse, DeleteProductItemDeleteResponse>(`/api/product/item/delete`, { ...axiosRequestConfig, params: { id: params.id, silent: params.silent } })
+  return request.delete<DeleteProductItemDeleteResponse, DeleteProductItemDeleteResponse>(`/api/product/item/delete`, { ...axiosRequestConfig, params })
 }
 

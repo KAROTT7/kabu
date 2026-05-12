@@ -80,10 +80,7 @@ export function getTradeAfterSalePage(
     `/trade/after-sale/page`,
     {
       ...axiosRequestConfig,
-      params: {
-        pageNo: params.pageNo,
-        pageSize: params.pageSize
-      }
+      params
     }
   )
 }
@@ -100,22 +97,18 @@ GET /member/user/list/{id}
 生成结果：
 
 ```ts
-export interface GetMemberUserListByIdParams {
-  id: number
-}
-
 export function getMemberUserListById(
-  params: GetMemberUserListByIdParams,
+  id: string | number,
   axiosRequestConfig?: AxiosRequestConfig
 ): Promise<GetMemberUserListByIdResponse> {
   return request.get<GetMemberUserListByIdResponse, GetMemberUserListByIdResponse>(
-    `/member/user/list/${params.id}`,
+    `/member/user/list/${id}`,
     axiosRequestConfig
   )
 }
 ```
 
-路径参数只用于拼接 URL，不会同时作为查询参数发送。
+这里的 `id` 是路径参数，用于拼接 URL；axios 配置里的 `params` 只代表查询参数。路径参数不会同时作为查询参数发送。
 
 ## 路径参数和查询参数
 
@@ -129,21 +122,19 @@ GET /member/user/{id}/orders?pageNo
 
 ```ts
 export interface GetMemberUserByIdOrdersParams {
-  id: number
   pageNo?: number
 }
 
 export function getMemberUserByIdOrders(
+  id: string | number,
   params: GetMemberUserByIdOrdersParams,
   axiosRequestConfig?: AxiosRequestConfig
 ): Promise<GetMemberUserByIdOrdersResponse> {
   return request.get<GetMemberUserByIdOrdersResponse, GetMemberUserByIdOrdersResponse>(
-    `/member/user/${params.id}/orders`,
+    `/member/user/${id}/orders`,
     {
       ...axiosRequestConfig,
-      params: {
-        pageNo: params.pageNo
-      }
+      params
     }
   )
 }
@@ -206,9 +197,7 @@ export function postPromotionCouponTake(
     PostPromotionCouponTakeBody
   >(`/promotion/coupon/take`, data, {
     ...axiosRequestConfig,
-    params: {
-      templateId: params.templateId
-    }
+    params
   })
 }
 ```
@@ -224,16 +213,12 @@ PUT /member/user/{id}
 生成结果：
 
 ```ts
-export interface PutMemberUserByIdParams {
-  id: number
-}
-
 export type PutMemberUserByIdBody = {
   name: string
 }
 
 export function putMemberUserById(
-  params: PutMemberUserByIdParams,
+  id: string | number,
   data: PutMemberUserByIdBody,
   axiosRequestConfig?: AxiosRequestConfig<PutMemberUserByIdBody>
 ): Promise<PutMemberUserByIdResponse> {
@@ -241,7 +226,7 @@ export function putMemberUserById(
     PutMemberUserByIdResponse,
     PutMemberUserByIdResponse,
     PutMemberUserByIdBody
-  >(`/member/user/${params.id}`, data, axiosRequestConfig)
+  >(`/member/user/${id}`, data, axiosRequestConfig)
 }
 ```
 
@@ -257,7 +242,6 @@ PATCH /member/user/{id}?notify
 
 ```ts
 export interface PatchMemberUserByIdParams {
-  id: number
   notify?: boolean
 }
 
@@ -266,6 +250,7 @@ export type PatchMemberUserByIdBody = {
 }
 
 export function patchMemberUserById(
+  id: string | number,
   params: PatchMemberUserByIdParams,
   data: PatchMemberUserByIdBody,
   axiosRequestConfig?: AxiosRequestConfig<PatchMemberUserByIdBody>
@@ -274,11 +259,9 @@ export function patchMemberUserById(
     PatchMemberUserByIdResponse,
     PatchMemberUserByIdResponse,
     PatchMemberUserByIdBody
-  >(`/member/user/${params.id}`, data, {
+  >(`/member/user/${id}`, data, {
     ...axiosRequestConfig,
-    params: {
-      notify: params.notify
-    }
+    params
   })
 }
 ```
@@ -303,9 +286,7 @@ export function deleteTradeAfterSaleCancel(
     DeleteTradeAfterSaleCancelResponse
   >(`/trade/after-sale/cancel`, {
     ...axiosRequestConfig,
-    params: {
-      id: params.id
-    }
+    params
   })
 }
 ```
@@ -322,7 +303,7 @@ DELETE /member/user/{id}
 
 ```ts
 export function deleteMemberUserById(
-  params: DeleteMemberUserByIdParams,
+  id: string | number,
   data: DeleteMemberUserByIdBody,
   axiosRequestConfig?: AxiosRequestConfig<DeleteMemberUserByIdBody>
 ): Promise<DeleteMemberUserByIdResponse> {
@@ -330,7 +311,7 @@ export function deleteMemberUserById(
     DeleteMemberUserByIdResponse,
     DeleteMemberUserByIdResponse,
     DeleteMemberUserByIdBody
-  >(`/member/user/${params.id}`, {
+  >(`/member/user/${id}`, {
     ...axiosRequestConfig,
     data
   })

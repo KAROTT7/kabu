@@ -3,7 +3,7 @@ import { getRequestSchema, getResponseSchema, resolvePathParams, resolveResponse
 import { rewritePath } from './rewrite-rules.js'
 import { upperFirst, operationName } from './naming.js'
 import { schemaToTs } from './schema-to-ts.js'
-import { objectAccess, pathToTemplateLiteral, tsObjectKey } from './ts-syntax.js'
+import { isValidTsIdentifier, pathToTemplateLiteral, tsObjectKey } from './ts-syntax.js'
 
 const METHOD_MAP: Record<string, string> = {
   get: 'get',
@@ -70,17 +70,6 @@ function emitParamsInterface(block: string[], paramsType: string, params: any[],
   block.push('')
 }
 
-function queryParamsExpression(queryParams: any[], sourceName: string): string {
-  if (queryParams.length === 0) return 'undefined'
-
-  const fields = queryParams.map(param => {
-    const key = tsObjectKey(param.name)
-    return `${key}: ${objectAccess(sourceName, param.name)}`
-  })
-
-  return `{ ${fields.join(', ')} }`
-}
-
 function axiosConfigExpression(baseName: string, entries: Array<[string, string]>): string {
   const fields = entries.filter(([, value]) => value && value !== 'undefined')
   if (fields.length === 0) return baseName
@@ -95,6 +84,60 @@ function responseOnlyGenerics(responseType: string): string {
 
 function responseBodyGenerics(responseType: string, bodyType: string): string {
   return `<${responseType}, ${responseType}, ${bodyType}>`
+}
+
+function pathArgumentNameFallback(value: unknown): string {
+  const words = String(value || '')
+    .replace(/[{}]/g, '')
+    .trim()
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+
+  if (words.length === 0) return 'Value'
+
+  return words
+    .map((word, index) => {
+      const normalized = /^[A-Z0-9]+$/.test(word) ? word.toLowerCase() : word
+      return index === 0 ? normalized[0].toLowerCase() + normalized.slice(1) : upperFirst(normalized)
+    })
+    .join('')
+}
+
+function pathArgumentBaseName(paramName: string): string {
+  const rawName = String(paramName || '').trim()
+  if (isValidTsIdentifier(rawName)) return rawName
+
+  const fallback = pathArgumentNameFallback(rawName)
+  if (isValidTsIdentifier(fallback)) return fallback
+
+  const prefixedFallback = `path${upperFirst(fallback)}`
+  return isValidTsIdentifier(prefixedFallback) ? prefixedFallback : 'pathValue'
+}
+
+function pathArgumentNames(pathParams: any[], reservedNames: string[]): Map<string, string> {
+  const names = new Map<string, string>()
+  const used = new Set<string>(reservedNames)
+
+  for (const param of pathParams) {
+    const paramName = String(param.name || '')
+    const baseName = pathArgumentBaseName(paramName)
+    let argName = baseName
+    let index = 2
+
+    if (used.has(argName)) {
+      argName = `${baseName}Path`
+    }
+
+    while (used.has(argName)) {
+      argName = `${baseName}Path${index}`
+      index += 1
+    }
+
+    used.add(argName)
+    names.set(paramName, argName)
+  }
+
+  return names
 }
 
 function resolveOperationName(method: string, url: string, functionNames: Map<string, string>): string {
@@ -125,9 +168,14 @@ export function renderOperationBlock(
   const parameters = mergeParameters(operation.pathItemParameters, detail.parameters || [])
   const pathParams = resolvePathParams(url, parameters)
   const queryParams = parameters.filter(param => param.in === 'query')
-  const functionParams = [...pathParams, ...queryParams]
   const requestSchema = getRequestSchema(detail)
   const responseSchema = getResponseSchema(detail)
+  const reservedPathArgNames = [
+    'axiosRequestConfig',
+    ...(queryParams.length > 0 ? ['params'] : []),
+    ...(requestSchema ? ['data'] : [])
+  ]
+  const pathArgNames = pathArgumentNames(pathParams, reservedPathArgNames)
 
   const paramsType = `${upperFirst(fnName)}Params`
   const bodyType = `${upperFirst(fnName)}Body`
@@ -135,8 +183,8 @@ export function renderOperationBlock(
 
   const block: string[] = []
 
-  if (functionParams.length > 0) {
-    emitParamsInterface(block, paramsType, functionParams, context)
+  if (queryParams.length > 0) {
+    emitParamsInterface(block, paramsType, queryParams, context)
   }
 
   if (requestSchema) {
@@ -153,44 +201,36 @@ export function renderOperationBlock(
   block.push(' */')
 
   const hasDataArgument = DATA_ARGUMENT_METHODS.has(requestMethod)
-  const requestUrlLiteral = pathToTemplateLiteral(requestUrl, functionParams.length > 0 ? 'params' : 'data')
-  const queryParamsValue = queryParamsExpression(queryParams, 'params')
+  const requestUrlLiteral = pathToTemplateLiteral(requestUrl, Object.fromEntries(pathArgNames))
+  const queryParamsValue = queryParams.length > 0 ? 'params' : 'undefined'
   const configWithParams = axiosConfigExpression('axiosRequestConfig', [['params', queryParamsValue]])
   const configWithParamsAndData = axiosConfigExpression('axiosRequestConfig', [
     ['params', queryParamsValue],
     ['data', 'data']
   ])
+  const pathArguments = pathParams.map(param => `${pathArgNames.get(String(param.name || ''))}: string | number`)
+  const functionArguments = [
+    ...pathArguments,
+    ...(queryParams.length > 0 ? [`params: ${paramsType}`] : []),
+    ...(requestSchema ? [`data: ${bodyType}`] : []),
+    requestSchema ? `axiosRequestConfig?: AxiosRequestConfig<${bodyType}>` : 'axiosRequestConfig?: AxiosRequestConfig'
+  ]
+  const signature = `export function ${fnName}(${functionArguments.join(', ')}): Promise<${responseType}> {`
 
-  if (functionParams.length > 0 && requestSchema) {
-    block.push(`export function ${fnName}(params: ${paramsType}, data: ${bodyType}, axiosRequestConfig?: AxiosRequestConfig<${bodyType}>): Promise<${responseType}> {`)
+  if (requestSchema) {
+    block.push(signature)
     if (hasDataArgument) {
       block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, bodyType)}(${requestUrlLiteral}, data, ${configWithParams})`)
     } else {
       block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, bodyType)}(${requestUrlLiteral}, ${configWithParamsAndData})`)
     }
     block.push('}')
-  } else if (functionParams.length > 0) {
-    block.push(`export function ${fnName}(params: ${paramsType}, axiosRequestConfig?: AxiosRequestConfig): Promise<${responseType}> {`)
+  } else {
+    block.push(signature)
     if (hasDataArgument) {
       block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType)}(${requestUrlLiteral}, undefined, ${configWithParams})`)
     } else {
       block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType)}(${requestUrlLiteral}, ${configWithParams})`)
-    }
-    block.push('}')
-  } else if (requestSchema) {
-    block.push(`export function ${fnName}(data: ${bodyType}, axiosRequestConfig?: AxiosRequestConfig<${bodyType}>): Promise<${responseType}> {`)
-    if (hasDataArgument) {
-      block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, bodyType)}(${requestUrlLiteral}, data, axiosRequestConfig)`)
-    } else {
-      block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, bodyType)}(${requestUrlLiteral}, { ...axiosRequestConfig, data })`)
-    }
-    block.push('}')
-  } else {
-    block.push(`export function ${fnName}(axiosRequestConfig?: AxiosRequestConfig): Promise<${responseType}> {`)
-    if (hasDataArgument) {
-      block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType)}(${requestUrlLiteral}, undefined, axiosRequestConfig)`)
-    } else {
-      block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType)}(${requestUrlLiteral}, axiosRequestConfig)`)
     }
     block.push('}')
   }
