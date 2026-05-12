@@ -12,6 +12,7 @@ export interface GenerateServicesOptions {
   inputDir?: string
   outputDir?: string
   fileHeader?: string
+  rewrite?: RewriteInput | RewriteInput[]
   rewritePrefix?: RewriteInput | RewriteInput[]
   root?: string
   logger?: Logger

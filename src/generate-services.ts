@@ -67,7 +67,7 @@ function normalizeGenerateOptions(options: Partial<GenerateServicesOptions> = {}
   const inputDir = options.inputDir ? resolveRootPath(options.inputDir, root) : ''
   const outputDir = options.outputDir ? resolveRootPath(options.outputDir, root) : inputDir
   const fileHeader = normalizeFileHeader(options.fileHeader)
-  const pathRewrites = normalizeRewriteRules(options.pathRewrites || options.rewritePrefix)
+  const pathRewrites = normalizeRewriteRules(options.pathRewrites || options.rewrite || options.rewritePrefix)
 
   if (!inputDir) {
     throw new Error('缺少必填参数: --input-dir <path>（或位置参数 <input-dir>）')

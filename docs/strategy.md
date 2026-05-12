@@ -115,7 +115,7 @@ GET /member/user_list -> getMemberUserList
 
 ## 路径重写
 
-`rewritePrefix` 只改变生成后的请求 URL，不改变函数名。
+`rewrite` 只改变生成后的请求 URL，不改变函数名。
 
 规则格式：
 
@@ -128,8 +128,8 @@ GET /member/user_list -> getMemberUserList
 ```bash
 kabu gen ./openapi \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" \
-  --rewrite-prefix /a/b=/c/a/c \
-  --rewrite-prefix /a=/c/a/b
+  --rewrite /a/b=/c/a/c \
+  --rewrite /a=/c/a/b
 ```
 
 匹配规则：

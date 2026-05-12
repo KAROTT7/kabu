@@ -24,7 +24,7 @@ pnpm dev gen --input-dir ./openapi --output-dir ./src/services --file-header "im
 
 ```bash
 pnpm build
-node ./dist/src/bin/kabu.js gen ./example/openapi --output-dir ./example/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'" --rewrite-prefix /product=/api/product
+node ./dist/src/bin/kabu.js gen ./example/openapi --output-dir ./example/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'" --rewrite /product=/api/product
 ```
 
 构建 TypeScript：
@@ -51,14 +51,14 @@ kabu gen [inputDir] --file-header <code> [options]
 - `--input-dir <dir>`：递归扫描 `*.openapi.json` 的输入目录
 - `--output-dir <dir>`：生成 `.ts` 文件的输出目录，默认等于 `inputDir`
 - `--file-header <code>`：生成文件头部代码，通常用于自定义依赖导入
-- `--rewrite-prefix <from=to>`：有序请求路径重写规则，可重复传入
+- `--rewrite <from=to>`：有序请求路径重写规则，可重复传入
 
 详细生成规则见 [生成策略](./docs/strategy.md)，完整案例见 [生成案例](./docs/examples.md)。
 
-`rewrite-prefix` 按传入顺序匹配，命中第一条后停止：
+`rewrite` 按传入顺序匹配，命中第一条后停止：
 
 ```bash
-kabu gen ./openapi --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" --rewrite-prefix /a/b=/c/a/c --rewrite-prefix /a=/c/a/b
+kabu gen ./openapi --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" --rewrite /a/b=/c/a/c --rewrite /a=/c/a/b
 ```
 
 ## 项目结构

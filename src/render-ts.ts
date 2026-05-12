@@ -12,7 +12,7 @@ function fileHeaderLines(fileHeader: unknown): string[] {
 }
 
 export function generateFromSpec(spec: any, moduleName: string, options: Partial<GenerateServicesOptions> = {}): string {
-  const pathRewrites = normalizeRewriteRules(options.pathRewrites || options.rewritePrefix)
+  const pathRewrites = normalizeRewriteRules(options.pathRewrites || options.rewrite || options.rewritePrefix)
   const schemaMap: SchemaMap = { ...(spec.components?.schemas || {}) }
   const operations = collectOperations(spec)
   const title = spec.info?.title || moduleName
