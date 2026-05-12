@@ -5,19 +5,19 @@
 ## 1. 项目定位
 
 - `kabu` 是一个 TypeScript / Node.js CLI，用于从 OpenAPI 3.x 文档生成 axios 风格的 TypeScript service 函数。
-- 这是单包仓库，不是 monorepo；核心代码位于 `src/gen`，CLI 入口位于 `src/bin/kabu.ts`，命令注册位于 `src/commands/gen.ts`。
+- 这是单包仓库，不是 monorepo；OpenAPI 生成核心代码位于 `src/*.ts`，公共导出位于 `src/index.ts`，CLI 可执行入口位于 `src/bin/kabu.ts`，CLI 初始化位于 `src/cli/index.ts`，命令注册位于 `src/cli/commands/gen.ts`。
 - `docs/strategy.md` 和 `docs/examples.md` 是生成规则说明；`example/` 是可复现的模拟输入和生成输出，属于行为契约的一部分。
 - 当前包管理器为 `pnpm@10.18.1`，Node 版本要求为 `>=18`。
-- TypeScript 使用 ESM / `NodeNext`，源码中的相对导入需要保留 `.js` 后缀，例如 `../gen/index.js`。
+- TypeScript 使用 ESM / `NodeNext`，源码中的相对导入需要保留 `.js` 后缀，例如 `../../index.js`。
 
 ## 2. 开始工作前
 
 - 先执行并查看 `git status --short --branch`，确认当前分支和未提交改动。
 - 先阅读与任务直接相关的文件，再修改代码。涉及生成规则时，至少查看：
-  - `src/gen/render-ts.ts`
-  - `src/gen/openapi.ts`
-  - `src/gen/generate-services.ts`
-  - `src/gen/rewrite-rules.ts`
+  - `src/render-ts.ts`
+  - `src/openapi.ts`
+  - `src/generate-services.ts`
+  - `src/rewrite-rules.ts`
   - `docs/strategy.md`
   - `docs/examples.md`
   - `example/README.md`
@@ -55,8 +55,8 @@ node ./dist/src/bin/kabu.js gen ./example/openapi \
 
 - 优先遵循所在文件已有风格；整体偏向 2 空格缩进、单引号、TypeScript 函数式工具函数。
 - 不为小改动引入新依赖；新增依赖必须能明显降低复杂度，并确认兼容当前 Node / TypeScript / pnpm 配置。
-- 保持 CLI 层轻薄：`src/bin/kabu.ts` 只做 CLI 初始化，`src/commands/gen.ts` 只做命令参数注册与错误输出，核心逻辑放在 `src/gen`。
-- 公共导出集中从 `src/gen/index.ts` 暴露；新增公共 API 时同步维护类型导出。
+- 保持 CLI 层轻薄：`src/bin/kabu.ts` 只做可执行入口转发，`src/cli/index.ts` 只做 CLI 初始化，`src/cli/commands/gen.ts` 只做命令参数注册与错误输出，核心逻辑放在 `src` 根目录的生成器模块。
+- 公共导出集中从 `src/index.ts` 暴露；新增公共 API 时同步维护类型导出。
 - OpenAPI schema 边界允许使用 `any` 表达不稳定输入；内部新增稳定结构时优先补明确类型。
 - 错误消息和用户可见日志遵循现有中文风格，例如 `缺少必填参数`、`输入目录不存在或不是目录`。
 

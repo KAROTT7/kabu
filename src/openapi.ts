@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import type { SchemaMap, SchemaRenderer, TsContext } from './types.js'
+import { pathParamName } from './naming.js'
 
 export function readJSON(filePath: string): any {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'))
@@ -87,14 +88,6 @@ export function assertOpenApiSupported(spec: any, filePath: string): void {
   if (!/^3\./.test(version)) {
     throw new Error(`仅支持 OpenAPI 3.x，当前为 ${version}: ${filePath}`)
   }
-}
-
-function pathParamName(segment: unknown): string {
-  const value = String(segment || '').trim()
-  const braceMatch = value.match(/^\{(.+)\}$/)
-  if (braceMatch) return braceMatch[1]
-  if (value.startsWith(':') && value.length > 1) return value.slice(1)
-  return ''
 }
 
 function pathParamNamesFromUrl(url: string): string[] {

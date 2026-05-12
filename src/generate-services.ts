@@ -43,6 +43,21 @@ function moduleNameFromOpenApiFile(filePath: string): string {
   return fileName.slice(0, -'.openapi.json'.length)
 }
 
+function assertUniqueModuleNames(openApiFiles: string[], root: string): void {
+  const seen = new Map<string, string>()
+
+  for (const filePath of openApiFiles) {
+    const moduleName = moduleNameFromOpenApiFile(filePath)
+    const existing = seen.get(moduleName)
+    if (existing) {
+      throw new Error(
+        `OpenAPI 文件名冲突，都会生成 ${moduleName}.ts: ${path.relative(root, existing)} 和 ${path.relative(root, filePath)}`
+      )
+    }
+    seen.set(moduleName, filePath)
+  }
+}
+
 function normalizeGenerateOptions(options: Partial<GenerateServicesOptions> = {}): NormalizedGenerateOptions {
   const root = options.root || ROOT
   const inputDir = options.inputDir ? resolveRootPath(options.inputDir, root) : ''
@@ -81,6 +96,7 @@ export function generateServices(options: Partial<GenerateServicesOptions> = {})
   if (openApiFiles.length === 0) {
     throw new Error(`未找到 *.openapi.json 文件: ${args.inputDir}`)
   }
+  assertUniqueModuleNames(openApiFiles, ROOT)
 
   const files: Array<{ input: string; output: string }> = []
 

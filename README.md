@@ -64,9 +64,11 @@ kabu gen ./openapi --request-import '@/request' --rewrite-prefix /a/b=/c/a/c --r
 ## 项目结构
 
 ```text
-src/bin/kabu.ts             CLI 入口
-src/commands/gen.ts         cac 命令注册
-src/gen/                    OpenAPI 生成核心模块
+src/bin/kabu.ts             CLI 可执行入口
+src/cli/index.ts            CLI 初始化
+src/cli/commands/gen.ts     cac 命令注册
+src/index.ts                OpenAPI 生成核心公共导出
+src/*.ts                    OpenAPI 生成核心模块
 docs/strategy.md            生成规则
 docs/examples.md            生成案例
 example/                    可复现完整模拟案例

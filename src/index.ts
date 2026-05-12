@@ -1,6 +1,8 @@
 export { generateServices } from './generate-services.js'
-export { generateFromSpec, operationName, schemaToTs } from './render-ts.js'
+export { operationName } from './naming.js'
+export { generateFromSpec } from './render-ts.js'
 export { normalizeRewriteRules, parseRewriteRule, rewritePath } from './rewrite-rules.js'
+export { schemaToTs } from './schema-to-ts.js'
 export type {
   GenerateResult,
   GenerateServicesOptions,

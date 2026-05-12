@@ -26,6 +26,8 @@ member.openapi.json -> member.ts
 trade.openapi.json  -> trade.ts
 ```
 
+如果递归扫描中出现同名 OpenAPI 文件，例如 `a/product.openapi.json` 和 `b/product.openapi.json`，二者都会映射到 `product.ts`。为避免静默覆盖，生成器会直接报错并提示冲突文件。
+
 支持的 OpenAPI 版本：
 
 - OpenAPI `3.0.x`
@@ -156,6 +158,8 @@ OpenAPI 参数按位置分为：
 
 当前生成策略：
 
+- 支持 Path Item 级别的公共 `parameters`，也支持 operation 级别的 `parameters`。
+- 如果 Path Item 和 operation 中存在相同 `in + name` 的参数，operation 参数覆盖 Path Item 参数。
 - `path` 参数进入函数第一个参数 `params`，并用于拼接 URL。
 - `query` 参数进入函数第一个参数 `params`，并写入 `AxiosRequestConfig.params`。
 - `header` 参数不生成，由 axios 拦截器、axios 默认配置或调用方的 `axiosRequestConfig.headers` 处理。
@@ -253,6 +257,8 @@ getTradeOrderPage    -> GetTradeOrderPageResponse
 | `allOf` | 交叉类型 |
 | `enum` | 字面量联合类型 |
 | `const` | 字面量类型 |
+
+`nullable: true` 会追加 `| null`，包括 `oneOf`、`anyOf`、`allOf` 等组合类型。
 
 未知或暂不支持的 schema 形态会生成 `unknown`。
 
