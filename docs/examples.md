@@ -336,6 +336,58 @@ kabu gen ./openapi \
 /a/user   -> /c/a/b/user
 ```
 
+## 增量同步
+
+第一次导入：
+
+```text
+/product/item/page
+/product/item/{id}
+/product/item/{id}/delete
+```
+
+会先聚合到：
+
+```text
+openapi-baseline/product.openapi.json
+```
+
+再生成：
+
+```text
+product.ts
+```
+
+第二次如果只导入一个改过的接口：
+
+```text
+/product/item/{id}
+```
+
+并使用默认 `update` 模式，则会：
+
+- 用新的 `/product/item/{id}` 覆盖模块基线中的同路径同方法定义
+- 保留 `/product/item/page` 和 `/product/item/{id}/delete`
+- 再重新生成整份 `product.ts`
+
+也就是说，最终是“模块级整文件重生成”，但导入语义是“按模块增量合并”。
+
+## 全量同步
+
+如果传入：
+
+```bash
+kabu gen ./openapi \
+  --mode full \
+  --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
+```
+
+则会先清空基线目录和输出目录，再按当前输入目录完整重建：
+
+- 旧的模块基线文件会被清空
+- 旧的输出 `.ts` 文件会被清空
+- 当前输入目录中的接口会重新生成新的模块基线和新的输出文件
+
 ## 响应数据解包
 
 OpenAPI 响应 schema：

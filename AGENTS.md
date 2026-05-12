@@ -5,6 +5,7 @@
 ## 1. 项目定位
 
 - `kabu` 是一个 TypeScript / Node.js CLI，用于从 OpenAPI 3.x 文档生成 axios 风格的 TypeScript service 函数。
+- 默认生成流程是“输入 OpenAPI 片段 -> 按路径第一段聚合成模块基线 `openapi-baseline/*.openapi.json` -> 再生成最终 `.ts` 文件”。
 - 这是单包仓库，不是 monorepo；OpenAPI 生成核心代码位于 `src/*.ts`，公共导出位于 `src/index.ts`，CLI 可执行入口位于 `src/bin/kabu.ts`，CLI 初始化位于 `src/cli/index.ts`，命令注册位于 `src/cli/commands/gen.ts`。
 - `docs/strategy.md` 和 `docs/examples.md` 是生成规则说明；`example/` 是可复现的模拟输入和生成输出，属于行为契约的一部分。
 - 当前包管理器为 `pnpm@10.18.1`，Node 版本要求为 `>=18`。
@@ -67,7 +68,8 @@ node ./dist/src/bin/kabu.js gen ./example/openapi \
 修改生成逻辑时必须保持以下契约，除非用户明确要求改变：
 
 - 只支持 OpenAPI 3.x，输入目录递归扫描 `*.openapi.json`。
-- 文件名映射保持 `<module>.openapi.json -> <module>.ts`。
+- 模块名默认来自接口路径第一段，例如 `/product/item/page` 归属 `product`。
+- 模块基线文件映射保持 `<module>.openapi.json -> <module>.ts`。
 - 生成代码默认面向 axios 风格 request 封装，并假设响应拦截器已将 `AxiosResponse<T>` 解包成业务值 `T`。
 - 生成函数默认返回 `Promise<ResponseType>`，axios 泛型保持 `request.get<ResponseType, ResponseType>` 这类策略。
 - `GET`、`POST`、`PUT`、`DELETE`、`PATCH` 是当前支持的 HTTP 方法。
@@ -75,8 +77,9 @@ node ./dist/src/bin/kabu.js gen ./example/openapi \
 - `query` 参数写入 `AxiosRequestConfig.params`。
 - `POST`、`PUT`、`PATCH` 的请求体作为 axios 第二参数；`DELETE` 的请求体写入 `AxiosRequestConfig.data`。
 - `rewrite` 只改变请求 URL，不改变函数名；规则按传入顺序匹配，命中第一条后停止。
+- 默认 `update` 模式会把本次导入接口合并到模块基线中，并保留本次未导出的旧接口；`full` 模式会先清空模块基线目录与输出目录，再按当前输入完整重建。
 - 生成结果需要稳定可复现：文件排序、类型命名和函数命名都应保持确定性；同名接口函数应直接报错，不追加后缀。
-- 输出文件已存在时会覆盖；这个行为需要在文档中保持明确。
+- 输出文件已存在时会覆盖；模块基线文件也会按同步模式重写；这些行为需要在文档中保持明确。
 
 ## 6. 文档与 example 同步
 

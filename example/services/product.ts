@@ -19,15 +19,6 @@ export interface SyncTask {
   accepted: boolean
 }
 
-export type ProductStatus = 'draft' | 'on_sale' | 'off_sale' | 'archived'
-
-export interface ProductPage {
-  /** 总数 */
-  total: number
-  /** 商品列表 */
-  list: ProductRecord[]
-}
-
 export type ProductDetail = ProductRecord & { description: string; attributes?: Record<string, string>; skus: ProductSku[] }
 
 export interface DeleteProductRequest {
@@ -46,6 +37,19 @@ export interface ProductLog {
   operator?: string
   /** 创建时间 */
   createdAt: string
+}
+
+export interface UpdateProductPriceRequest {
+  /** 销售价 */
+  salePrice: number
+  /** 市场价 */
+  marketPrice?: number
+}
+
+export interface UpdateProductStatusRequest {
+  status: ProductStatus
+  /** 操作备注 */
+  remark?: string
 }
 
 export interface CreateProductRequest {
@@ -90,17 +94,13 @@ export interface ExportTask {
   downloadUrl: string
 }
 
-export interface UpdateProductPriceRequest {
-  /** 销售价 */
-  salePrice: number
-  /** 市场价 */
-  marketPrice?: number
-}
+export type ProductStatus = 'draft' | 'on_sale' | 'off_sale' | 'archived'
 
-export interface UpdateProductStatusRequest {
-  status: ProductStatus
-  /** 操作备注 */
-  remark?: string
+export interface ProductPage {
+  /** 总数 */
+  total: number
+  /** 商品列表 */
+  list: ProductRecord[]
 }
 
 export type ProductCategoryType = 'physical' | 'virtual' | 'bundle'
@@ -145,27 +145,6 @@ export function postProductCatalogSync(axiosRequestConfig?: AxiosRequestConfig):
   return request.post<PostProductCatalogSyncResponse, PostProductCatalogSyncResponse>(`/api/product/catalog/sync`, undefined, axiosRequestConfig)
 }
 
-export interface GetProductItemPageParams {
-  /** 页码 */
-  pageNo: number
-  /** 每页数量 */
-  pageSize: number
-  /** 商品状态 */
-  status?: ProductStatus
-  /** 商品名称或编码 */
-  keyword?: string
-}
-
-export type GetProductItemPageResponse = ProductPage
-
-/**
- * 分页查询商品
- * GET /api/product/item/page
- */
-export function getProductItemPage(params: GetProductItemPageParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemPageResponse> {
-  return request.get<GetProductItemPageResponse, GetProductItemPageResponse>(`/api/product/item/page`, { ...axiosRequestConfig, params })
-}
-
 export type GetProductItemByIdResponse = ProductDetail
 
 /**
@@ -205,35 +184,6 @@ export function getProductItemByIdLogs(id: string | number, params: GetProductIt
   return request.get<GetProductItemByIdLogsResponse, GetProductItemByIdLogsResponse>(`/api/product/item/${id}/logs`, { ...axiosRequestConfig, params })
 }
 
-export type PostProductItemCreateBody = CreateProductRequest
-
-export type PostProductItemCreateResponse = ProductRecord
-
-/**
- * 创建商品
- * POST /api/product/item/create
- */
-export function postProductItemCreate(data: PostProductItemCreateBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemCreateBody>): Promise<PostProductItemCreateResponse> {
-  return request.post<PostProductItemCreateResponse, PostProductItemCreateResponse, PostProductItemCreateBody>(`/api/product/item/create`, data, axiosRequestConfig)
-}
-
-export interface PostProductItemExportParams {
-  /** 导出格式 */
-  format: 'xlsx' | 'csv'
-}
-
-export type PostProductItemExportBody = ExportProductRequest
-
-export type PostProductItemExportResponse = ExportTask
-
-/**
- * 导出商品
- * POST /api/product/item/export
- */
-export function postProductItemExport(params: PostProductItemExportParams, data: PostProductItemExportBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemExportBody>): Promise<PostProductItemExportResponse> {
-  return request.post<PostProductItemExportResponse, PostProductItemExportResponse, PostProductItemExportBody>(`/api/product/item/export`, data, { ...axiosRequestConfig, params })
-}
-
 export type PutProductItemByIdPriceBody = UpdateProductPriceRequest
 
 export type PutProductItemByIdPriceResponse = ProductDetail
@@ -263,6 +213,18 @@ export function patchProductItemByIdStatus(id: string | number, params: PatchPro
   return request.patch<PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusBody>(`/api/product/item/${id}/status`, data, { ...axiosRequestConfig, params })
 }
 
+export type PostProductItemCreateBody = CreateProductRequest
+
+export type PostProductItemCreateResponse = ProductRecord
+
+/**
+ * 创建商品
+ * POST /api/product/item/create
+ */
+export function postProductItemCreate(data: PostProductItemCreateBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemCreateBody>): Promise<PostProductItemCreateResponse> {
+  return request.post<PostProductItemCreateResponse, PostProductItemCreateResponse, PostProductItemCreateBody>(`/api/product/item/create`, data, axiosRequestConfig)
+}
+
 export interface DeleteProductItemDeleteParams {
   /** 商品 ID */
   id: number
@@ -278,5 +240,43 @@ export type DeleteProductItemDeleteResponse = boolean
  */
 export function deleteProductItemDelete(params: DeleteProductItemDeleteParams, axiosRequestConfig?: AxiosRequestConfig): Promise<DeleteProductItemDeleteResponse> {
   return request.delete<DeleteProductItemDeleteResponse, DeleteProductItemDeleteResponse>(`/api/product/item/delete`, { ...axiosRequestConfig, params })
+}
+
+export interface PostProductItemExportParams {
+  /** 导出格式 */
+  format: 'xlsx' | 'csv'
+}
+
+export type PostProductItemExportBody = ExportProductRequest
+
+export type PostProductItemExportResponse = ExportTask
+
+/**
+ * 导出商品
+ * POST /api/product/item/export
+ */
+export function postProductItemExport(params: PostProductItemExportParams, data: PostProductItemExportBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemExportBody>): Promise<PostProductItemExportResponse> {
+  return request.post<PostProductItemExportResponse, PostProductItemExportResponse, PostProductItemExportBody>(`/api/product/item/export`, data, { ...axiosRequestConfig, params })
+}
+
+export interface GetProductItemPageParams {
+  /** 页码 */
+  pageNo: number
+  /** 每页数量 */
+  pageSize: number
+  /** 商品状态 */
+  status?: ProductStatus
+  /** 商品名称或编码 */
+  keyword?: string
+}
+
+export type GetProductItemPageResponse = ProductPage
+
+/**
+ * 分页查询商品
+ * GET /api/product/item/page
+ */
+export function getProductItemPage(params: GetProductItemPageParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemPageResponse> {
+  return request.get<GetProductItemPageResponse, GetProductItemPageResponse>(`/api/product/item/page`, { ...axiosRequestConfig, params })
 }
 

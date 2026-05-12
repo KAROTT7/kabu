@@ -22,12 +22,14 @@ example/
 ```bash
 pnpm build
 node ./dist/src/bin/kabu.js gen ./example/openapi \
+  --baseline-dir ./openapi-baseline \
   --output-dir ./example/services \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'" \
   --rewrite /product=/api/product
 ```
 
 生成结果会覆盖 `example/services/product.ts`。
+默认还会把模块级 OpenAPI 基线写入 `openapi-baseline/product.openapi.json`。
 
 ## 覆盖场景
 

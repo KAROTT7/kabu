@@ -13,7 +13,13 @@
 
 `kabu gen` 会递归扫描输入目录下所有 `*.openapi.json` 文件。
 
-文件名映射规则：
+默认会先按接口路径第一段拆分模块，并把模块级 OpenAPI 基线写入：
+
+```text
+openapi-baseline/<module>.openapi.json
+```
+
+再由这些模块基线文件生成最终输出：
 
 ```text
 <module>.openapi.json -> <module>.ts
@@ -22,11 +28,11 @@
 例如：
 
 ```text
-member.openapi.json -> member.ts
-trade.openapi.json  -> trade.ts
+/member/user/list -> openapi-baseline/member.openapi.json -> member.ts
+/trade/order/page -> openapi-baseline/trade.openapi.json  -> trade.ts
 ```
 
-如果递归扫描中出现同名 OpenAPI 文件，例如 `a/product.openapi.json` 和 `b/product.openapi.json`，二者都会映射到 `product.ts`。为避免静默覆盖，生成器会直接报错并提示冲突文件。
+也就是说，输入文件名本身不再决定输出模块；决定模块归属的是接口路径的第一段。
 
 支持的 OpenAPI 版本：
 
@@ -41,13 +47,34 @@ trade.openapi.json  -> trade.ts
 
 ## 输出文件
 
-每个 OpenAPI 文件生成一个同名 TypeScript 文件。
+每个模块基线 OpenAPI 文件生成一个同名 TypeScript 文件。
 
 生成文件包含：
 
 - 用户通过 `--file-header` 指定的文件头部代码
 - OpenAPI `components.schemas` 中被引用到的类型
 - 每个 operation 对应的请求参数类型、请求体类型、响应数据类型和请求函数
+
+## 同步模式
+
+`kabu gen` 支持两种生成模式：
+
+- `update`：默认模式。把本次导入的接口片段合并进模块基线，再从受影响的模块基线文件生成对应 `.ts`
+- `full`：先清空基线目录和输出目录，再把当前输入目录作为完整事实来源重新生成
+
+`update` 的合并规则：
+
+- 模块名来自接口路径第一段，例如 `/product/item/page` 归属 `product`
+- 同一路径同一方法会被新导入定义覆盖
+- 同一路径的其他方法保留
+- 本次未导出的旧接口默认保留
+- 多份输入文件中的同模块接口会合并到同一个模块基线文件
+
+`full` 的清理规则：
+
+- 生成前会先清空基线目录
+- 生成前会先清空输出目录
+- 然后再按当前输入目录里的接口重新生成模块基线和输出文件
 
 `--file-header` 是字符串形式，内容会写入生成文件开头，通常用于自定义依赖导入。生成函数默认会引用 `AxiosRequestConfig` 类型和 `request` 变量，因此文件头通常需要包含：
 
