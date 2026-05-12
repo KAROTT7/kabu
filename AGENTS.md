@@ -31,6 +31,7 @@
 ```bash
 pnpm install
 pnpm build
+pnpm test
 pnpm check
 pnpm dev --help
 ```
@@ -48,8 +49,9 @@ node ./dist/src/bin/kabu.js gen ./example/openapi \
 说明：
 
 - `pnpm build` 执行 `tsc`，并通过 `postbuild` 给 CLI 产物增加可执行权限。
+- `pnpm test` 执行 `vitest` 回归测试。
 - `pnpm check` 执行主项目 `tsc --noEmit` 和 `tsconfig.example.json` 的 example 类型检查。
-- 仓库当前没有 lint/test 脚本；不要声称已运行不存在的检查。
+- 仓库当前没有 lint 脚本；不要声称已运行不存在的检查。
 
 ## 4. 代码风格
 
