@@ -11,7 +11,7 @@ export interface GenerateServicesOptions {
   pathRewrites?: RewriteRule[]
   inputDir?: string
   outputDir?: string
-  requestImport?: string
+  fileHeader?: string
   rewritePrefix?: RewriteInput | RewriteInput[]
   root?: string
   logger?: Logger
@@ -20,7 +20,7 @@ export interface GenerateServicesOptions {
 export interface NormalizedGenerateOptions {
   inputDir: string
   outputDir: string
-  requestImport: string
+  fileHeader: string
   pathRewrites: RewriteRule[]
   logger?: Logger
 }

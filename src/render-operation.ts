@@ -97,17 +97,16 @@ function responseBodyGenerics(responseType: string, bodyType: string): string {
   return `<${responseType}, ${responseType}, ${bodyType}>`
 }
 
-function uniqueOperationName(method: string, url: string, functionNames: Set<string>): string {
-  const baseName = operationName(method, url)
-  let fnName = baseName
+function resolveOperationName(method: string, url: string, functionNames: Map<string, string>): string {
+  const fnName = operationName(method, url)
+  const source = `${method.toUpperCase()} ${url}`
+  const existing = functionNames.get(fnName)
 
-  if (functionNames.has(fnName)) {
-    let index = 2
-    while (functionNames.has(`${fnName}${index}`)) index += 1
-    fnName = `${fnName}${index}`
+  if (existing) {
+    throw new Error(`接口函数名冲突: ${fnName}，${existing} 与 ${source} 生成了同名函数`)
   }
 
-  functionNames.add(fnName)
+  functionNames.set(fnName, source)
   return fnName
 }
 
@@ -116,12 +115,12 @@ export function renderOperationBlock(
   schemaMap: SchemaMap,
   context: TsContext,
   pathRewrites: RewriteRule[],
-  functionNames: Set<string>
+  functionNames: Map<string, string>
 ): string[] {
   const { url, method, detail } = operation
   const requestMethod = METHOD_MAP[method]
   const requestUrl = rewritePath(url, pathRewrites)
-  const fnName = uniqueOperationName(method, url, functionNames)
+  const fnName = resolveOperationName(method, url, functionNames)
   const summary = (detail.summary || detail.description || '').replace(/\n+/g, ' ').trim()
   const parameters = mergeParameters(operation.pathItemParameters, detail.parameters || [])
   const pathParams = resolvePathParams(url, parameters)

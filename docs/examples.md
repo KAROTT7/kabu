@@ -343,7 +343,7 @@ export function deleteMemberUserById(
 
 ```bash
 kabu gen ./openapi \
-  --request-import '@/request' \
+  --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" \
   --rewrite-prefix /a/b=/c/a/c \
   --rewrite-prefix /a=/c/a/b
 ```

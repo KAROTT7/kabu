@@ -45,19 +45,18 @@ trade.openapi.json  -> trade.ts
 
 生成文件包含：
 
-- `AxiosRequestConfig` 类型导入
-- 用户指定的 request 默认导入
+- 用户通过 `--file-header` 指定的文件头部代码
 - OpenAPI `components.schemas` 中被引用到的类型
 - 每个 operation 对应的请求参数类型、请求体类型、响应数据类型和请求函数
 
-默认导入形态：
+`--file-header` 是字符串形式，内容会写入生成文件开头，通常用于自定义依赖导入。生成函数默认会引用 `AxiosRequestConfig` 类型和 `request` 变量，因此文件头通常需要包含：
 
 ```ts
 import type { AxiosRequestConfig } from 'axios'
 import request from '@/request'
 ```
 
-`request` 的导入路径由 `--request-import` 控制。
+命令行中可以传入实际换行，也可以传入 `\n`，生成器会将 `\n` 转成换行。
 
 ## 接口方法选择
 
@@ -88,7 +87,7 @@ import request from '@/request'
 4. `-`、`_`、空格等分隔符会被视为单词边界。
 5. 路径参数转换为 `ByXxx`。
 6. 拼接所有片段。
-7. 如果同一个文件中出现重名，追加数字后缀。
+7. 同一个文件中生成的函数名必须唯一；如果不同 `method + path` 生成了同名函数，生成器会直接报错。
 
 路径参数支持两种形式：
 
@@ -105,13 +104,14 @@ GET /member/user/list/{id} -> getMemberUserListById
 POST /trade/order/create   -> postTradeOrderCreate
 ```
 
-重名处理：
+同名冲突示例：
 
 ```text
-getMemberUserList
-getMemberUserList2
-getMemberUserList3
+GET /member/user-list -> getMemberUserList
+GET /member/user_list -> getMemberUserList
 ```
+
+上述两个接口会生成同名函数，生成器会报错，不会自动追加数字后缀。
 
 ## 路径重写
 
@@ -127,7 +127,7 @@ getMemberUserList3
 
 ```bash
 kabu gen ./openapi \
-  --request-import '@/request' \
+  --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" \
   --rewrite-prefix /a/b=/c/a/c \
   --rewrite-prefix /a=/c/a/b
 ```
@@ -366,5 +366,5 @@ request.post<ResponseData, ResponseData, RequestBody>(url, data, config)
 - 输出文件已存在时会直接覆盖。
 - 未找到任何 `*.openapi.json` 文件时会报错。
 - 未提供输入目录时会报错。
-- 未提供 `--request-import` 时会报错。
+- 未提供 `--file-header` 时会报错。
 - 输入目录不存在或不是目录时会报错。

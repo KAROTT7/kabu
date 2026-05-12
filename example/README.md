@@ -23,7 +23,7 @@ example/
 pnpm build
 node ./dist/src/bin/kabu.js gen ./example/openapi \
   --output-dir ./example/services \
-  --request-import '../request' \
+  --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'" \
   --rewrite-prefix /product=/api/product
 ```
 
@@ -44,5 +44,6 @@ node ./dist/src/bin/kabu.js gen ./example/openapi \
 | 路径参数、查询参数和请求体 | `PATCH /product/item/{id}/status?notify` |
 | `DELETE` 携带查询参数 | `DELETE /product/item/delete?id` |
 | `DELETE` 携带请求体 | `DELETE /product/item/{id}` |
+| 文件头 | `--file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'"` |
 | 路径重写 | `--rewrite-prefix /product=/api/product` |
 | 响应数据解包 | 所有 `ApiResultXxx.data` 都会解包成业务响应类型 |

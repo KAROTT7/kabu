@@ -58,25 +58,29 @@ function assertUniqueModuleNames(openApiFiles: string[], root: string): void {
   }
 }
 
+function normalizeFileHeader(value: unknown): string {
+  return String(value || '').replace(/\\n/g, '\n').replace(/\r\n?/g, '\n').trim()
+}
+
 function normalizeGenerateOptions(options: Partial<GenerateServicesOptions> = {}): NormalizedGenerateOptions {
   const root = options.root || ROOT
   const inputDir = options.inputDir ? resolveRootPath(options.inputDir, root) : ''
   const outputDir = options.outputDir ? resolveRootPath(options.outputDir, root) : inputDir
-  const requestImport = String(options.requestImport || '').trim()
+  const fileHeader = normalizeFileHeader(options.fileHeader)
   const pathRewrites = normalizeRewriteRules(options.pathRewrites || options.rewritePrefix)
 
   if (!inputDir) {
     throw new Error('缺少必填参数: --input-dir <path>（或位置参数 <input-dir>）')
   }
 
-  if (!requestImport) {
-    throw new Error('缺少必填参数: --request-import <path>')
+  if (!fileHeader) {
+    throw new Error('缺少必填参数: --file-header <code>')
   }
 
   return {
     inputDir,
     outputDir,
-    requestImport,
+    fileHeader,
     pathRewrites,
     logger: options.logger
   }
@@ -108,7 +112,7 @@ export function generateServices(options: Partial<GenerateServicesOptions> = {})
     assertOpenApiSupported(spec, openApiPath)
     const outputCode = generateFromSpec(spec, moduleName, {
       pathRewrites: args.pathRewrites,
-      requestImport: args.requestImport
+      fileHeader: args.fileHeader
     })
 
     fs.writeFileSync(outputPath, outputCode, 'utf8')

@@ -2,21 +2,22 @@ import type { GenerateServicesOptions, SchemaMap } from './types.js'
 import { collectOperations, renderOperationBlock } from './render-operation.js'
 import { normalizeRewriteRules } from './rewrite-rules.js'
 import { emitSchemaType } from './schema-to-ts.js'
-import { quoteForSingleQuoteString } from './ts-syntax.js'
 
 export { operationName } from './naming.js'
 export { schemaToTs } from './schema-to-ts.js'
 
+function fileHeaderLines(fileHeader: unknown): string[] {
+  const normalized = String(fileHeader || '').replace(/\\n/g, '\n').replace(/\r\n?/g, '\n').trim()
+  return normalized ? normalized.split('\n') : []
+}
+
 export function generateFromSpec(spec: any, moduleName: string, options: Partial<GenerateServicesOptions> = {}): string {
   const pathRewrites = normalizeRewriteRules(options.pathRewrites || options.rewritePrefix)
-  const { requestImport } = options
   const schemaMap: SchemaMap = { ...(spec.components?.schemas || {}) }
   const operations = collectOperations(spec)
   const title = spec.info?.title || moduleName
-  const requestImportEscaped = quoteForSingleQuoteString(requestImport)
   const lines = [
-    `import type { AxiosRequestConfig } from 'axios'`,
-    `import request from '${requestImportEscaped}'`,
+    ...fileHeaderLines(options.fileHeader),
     '',
     `/** ${title}接口（由 OpenAPI 自动提取） */`,
     ''
@@ -24,7 +25,7 @@ export function generateFromSpec(spec: any, moduleName: string, options: Partial
 
   const usedRefs = new Set<string>()
   const context = { collectRef: (name: string) => usedRefs.add(name) }
-  const functionNames = new Set<string>()
+  const functionNames = new Map<string, string>()
   const operationBlocks = operations.map(operation => {
     return renderOperationBlock(operation, schemaMap, context, pathRewrites, functionNames)
   })

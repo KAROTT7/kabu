@@ -41,7 +41,7 @@ pnpm dev --help
 pnpm build
 node ./dist/src/bin/kabu.js gen ./example/openapi \
   --output-dir ./example/services \
-  --request-import '../request' \
+  --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'" \
   --rewrite-prefix /product=/api/product
 ```
 
@@ -73,7 +73,7 @@ node ./dist/src/bin/kabu.js gen ./example/openapi \
 - `query` 参数写入 `AxiosRequestConfig.params`。
 - `POST`、`PUT`、`PATCH` 的请求体作为 axios 第二参数；`DELETE` 的请求体写入 `AxiosRequestConfig.data`。
 - `rewritePrefix` 只改变请求 URL，不改变函数名；规则按传入顺序匹配，命中第一条后停止。
-- 生成结果需要稳定可复现：文件排序、类型命名、函数命名和重名后缀都应保持确定性。
+- 生成结果需要稳定可复现：文件排序、类型命名和函数命名都应保持确定性；同名接口函数应直接报错，不追加后缀。
 - 输出文件已存在时会覆盖；这个行为需要在文档中保持明确。
 
 ## 6. 文档与 example 同步
