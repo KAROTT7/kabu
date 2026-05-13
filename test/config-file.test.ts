@@ -138,16 +138,11 @@ describe('config file', () => {
   it('ignores values that are not CLI options in the config file', async () => {
     const root = createTempDir()
     const configFile = writeConfig(root, {
-      gen: {
-        inputDir: './openapi'
+      unknownOption: true,
+      nestedOption: {
+        outputDir: './services'
       },
-      commands: {
-        gen: {
-          outputDir: './services'
-        }
-      },
-      root,
-      logger: false,
+      config: './other.config.mjs',
       inputDir: path.join(root, 'openapi')
     })
 

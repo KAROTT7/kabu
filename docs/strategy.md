@@ -116,7 +116,7 @@ export default defineConfig({
 })
 ```
 
-配置文件只读取当前命令行支持的参数字段：
+配置文件只读取当前生成参数字段：
 
 - `inputDir`
 - `baselineDir`
@@ -125,7 +125,7 @@ export default defineConfig({
 - `mode`
 - `rewrite`
 
-如果配置文件中出现 `gen`、`commands`、`logger`、`root`、`pathRewrites`、`rewritePrefix` 或其他非命令行参数字段，会被直接忽略。
+如果配置文件中出现 `gen`、`commands`、`config`、`logger`、`root`、`pathRewrites`、`rewritePrefix` 或其他非生成参数字段，会被直接忽略。
 
 合并优先级为：
 
