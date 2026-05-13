@@ -98,6 +98,7 @@ describe('rewrite option', () => {
     const result = generateServices({
       root,
       inputDir: './openapi',
+      baselineDir: './baseline',
       outputDir: './services',
       fileHeader,
       rewrite: '/product=/api/product',
@@ -119,6 +120,7 @@ describe('rewrite option', () => {
     generateServices({
       root,
       inputDir: './openapi',
+      baselineDir: './baseline',
       outputDir: './services',
       fileHeader,
       rewritePrefix: '/product=/legacy/product',

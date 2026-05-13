@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { DEFAULT_BASELINE_DIR, generateServices } from '../src/index.js'
+import { generateServices } from '../src/index.js'
 
 const tempDirs: string[] = []
 
@@ -270,7 +270,7 @@ describe('mode', () => {
     expect(readFile(root, 'services/product.ts')).toContain('新商品详情')
   })
 
-  it('uses the default baseline directory when baselineDir is omitted', () => {
+  it('requires baselineDir and outputDir', () => {
     const root = createTempDir()
     writeSpec(root, 'product.openapi.json', {
       openapi: '3.1.0',
@@ -288,16 +288,25 @@ describe('mode', () => {
       }
     })
 
-    const result = generateServices({
-      root,
-      inputDir: './openapi',
-      outputDir: './services',
-      fileHeader,
-      logger: false
-    })
+    expect(() =>
+      generateServices({
+        root,
+        inputDir: './openapi',
+        outputDir: './services',
+        fileHeader,
+        logger: false
+      })
+    ).toThrowError('缺少必填参数: --baseline-dir <path>')
 
-    expect(result.baselineDir).toBe(path.join(root, DEFAULT_BASELINE_DIR))
-    expect(fs.existsSync(path.join(root, DEFAULT_BASELINE_DIR, 'product.openapi.json'))).toBe(true)
+    expect(() =>
+      generateServices({
+        root,
+        inputDir: './openapi',
+        baselineDir,
+        fileHeader,
+        logger: false
+      })
+    ).toThrowError('缺少必填参数: --output-dir <path>')
   })
 
   it('rejects unsupported modes', () => {

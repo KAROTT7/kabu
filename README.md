@@ -62,15 +62,15 @@ kabu --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-
 ## 命令
 
 ```bash
-kabu [inputDir] --file-header <code> [options]
+kabu [inputDir] --baseline-dir <dir> --output-dir <dir> --file-header <code> [options]
 ```
 
 参数：
 
 - `-c, --config <file>`：指定配置文件；未指定时会尝试读取当前目录的 `kabu.config.*`
-- `--input-dir <dir>`：递归扫描 `*.openapi.json` 的输入目录
-- `--baseline-dir <dir>`：模块级 OpenAPI 基线目录，默认 `./openapi-baseline`
-- `--output-dir <dir>`：生成 `.ts` 文件的输出目录，默认等于 `inputDir`
+- `--input-dir <dir>`：必填，递归扫描 `*.openapi.json` 的输入目录；也可以用位置参数 `[inputDir]` 提供
+- `--baseline-dir <dir>`：必填，模块级 OpenAPI 基线目录
+- `--output-dir <dir>`：必填，生成 `.ts` 文件的输出目录
 - `--file-header <code>`：生成文件头部代码，通常用于自定义依赖导入
 - `--mode <update|full>`：生成模式，默认 `update`
 - `--rewrite <from=to>`：有序请求路径重写规则，可重复传入
@@ -84,7 +84,7 @@ kabu [inputDir] --file-header <code> [options]
 `rewrite` 按传入顺序匹配，命中第一条后停止：
 
 ```bash
-kabu ./openapi --baseline-dir ./openapi-baseline --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" --rewrite /a/b=/c/a/c --rewrite /a=/c/a/b
+kabu ./openapi --baseline-dir ./openapi-baseline --output-dir ./src/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" --rewrite /a/b=/c/a/c --rewrite /a=/c/a/b
 ```
 
 ## 项目结构

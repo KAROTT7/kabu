@@ -327,6 +327,8 @@ export function deleteMemberUserById(
 
 ```bash
 kabu ./openapi \
+  --baseline-dir ./openapi-baseline \
+  --output-dir ./services \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" \
   --rewrite /a/b=/c/a/c \
   --rewrite /a=/c/a/b
@@ -410,6 +412,8 @@ product.ts
 
 ```bash
 kabu ./openapi \
+  --baseline-dir ./openapi-baseline \
+  --output-dir ./services \
   --mode full \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
 ```

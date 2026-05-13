@@ -135,6 +135,8 @@ export default defineConfig({
 
 例如配置文件里写了 `mode: 'update'`，命令行执行 `kabu -c ./kabu.config.mjs --mode full` 时会以 `full` 为准。`rewrite`、`pathRewrites`、`rewritePrefix` 也遵循同样规则：只要命令行传入 `--rewrite`，就会覆盖配置文件里的路径重写配置。
 
+`inputDir`、`baselineDir`、`outputDir` 是必填参数，可以来自命令行，也可以来自配置文件。缺少任意一个都会直接报错。
+
 ## 接口方法选择
 
 当前会生成以下 HTTP 方法：
@@ -204,6 +206,8 @@ GET /member/user_list -> getMemberUserList
 
 ```bash
 kabu ./openapi \
+  --baseline-dir ./openapi-baseline \
+  --output-dir ./src/services \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" \
   --rewrite /a/b=/c/a/c \
   --rewrite /a=/c/a/b

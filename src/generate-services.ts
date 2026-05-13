@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { assertOpenApiSupported, readJSON } from './openapi.js'
-import { DEFAULT_BASELINE_DIR, syncModuleSpecs } from './module-baseline.js'
+import { syncModuleSpecs } from './module-baseline.js'
 import { generateFromSpec } from './render-ts.js'
 import { normalizeRewriteRules } from './rewrite-rules.js'
 import type { GenerateMode, GenerateResult, GenerateServicesOptions, NormalizedGenerateOptions } from './types.js'
@@ -78,14 +78,22 @@ function normalizeFileHeader(value: unknown): string {
 function normalizeGenerateOptions(options: Partial<GenerateServicesOptions> = {}): NormalizedGenerateOptions {
   const root = options.root || ROOT
   const inputDir = options.inputDir ? resolveRootPath(options.inputDir, root) : ''
-  const outputDir = options.outputDir ? resolveRootPath(options.outputDir, root) : inputDir
-  const baselineDir = options.baselineDir ? resolveRootPath(options.baselineDir, root) : resolveRootPath(DEFAULT_BASELINE_DIR, root)
+  const outputDir = options.outputDir ? resolveRootPath(options.outputDir, root) : ''
+  const baselineDir = options.baselineDir ? resolveRootPath(options.baselineDir, root) : ''
   const fileHeader = normalizeFileHeader(options.fileHeader)
   const pathRewrites = normalizeRewriteRules(options.pathRewrites || options.rewrite || options.rewritePrefix)
   const mode = normalizeMode(options.mode)
 
   if (!inputDir) {
     throw new Error('缺少必填参数: --input-dir <path>（或位置参数 <input-dir>）')
+  }
+
+  if (!baselineDir) {
+    throw new Error('缺少必填参数: --baseline-dir <path>')
+  }
+
+  if (!outputDir) {
+    throw new Error('缺少必填参数: --output-dir <path>')
   }
 
   if (!fileHeader) {

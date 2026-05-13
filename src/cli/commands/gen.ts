@@ -50,11 +50,11 @@ function mergeGenOptions(
 export function registerGenCommand(cli: CAC): void {
   cli
     .command('[inputDir]', 'Generate TypeScript services from OpenAPI JSON files')
-    .usage('[inputDir] --file-header <code> [options]')
+    .usage('[inputDir] --baseline-dir <dir> --output-dir <dir> --file-header <code> [options]')
     .option('-c, --config <file>', 'Use specified config file')
-    .option('--input-dir <dir>', 'Directory to scan for *.openapi.json files')
-    .option('--baseline-dir <dir>', 'Directory to store merged module baseline OpenAPI files')
-    .option('--output-dir <dir>', 'Directory to write generated .ts files')
+    .option('--input-dir <dir>', 'Required. Directory to scan for *.openapi.json files')
+    .option('--baseline-dir <dir>', 'Required. Directory to store merged module baseline OpenAPI files')
+    .option('--output-dir <dir>', 'Required. Directory to write generated .ts files')
     .option('--file-header <code>', 'Code inserted at the top of generated files')
     .option('--mode <mode>', 'Generate mode: update or full')
     .option('--rewrite <from=to>', 'Rewrite request path prefix; can be repeated')
