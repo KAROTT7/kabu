@@ -16,9 +16,9 @@ pnpm install
 
 ```bash
 pnpm dev --help
-pnpm dev gen --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
-pnpm dev gen --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --mode full --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
-pnpm dev gen -c ./kabu.config.mjs
+pnpm dev --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
+pnpm dev --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --mode full --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
+pnpm dev -c ./kabu.config.mjs
 ```
 
 配置文件示例：
@@ -35,7 +35,7 @@ export default defineConfig({
 })
 ```
 
-配置文件就是 `gen` 命令的参数对象，目前不做命令名映射；如果写入 `gen`、`commands`、`logger` 等非命令行参数字段，会被直接忽略。默认会自动读取当前目录下的 `kabu.config.mjs`、`kabu.config.js`、`kabu.config.cjs` 或 `kabu.config.json`。使用 `-c, --config <file>` 可以指定配置文件。执行时命令行参数优先，配置文件参数次之，例如 `kabu gen -c ./kabu.config.mjs --mode full` 会使用配置文件里的其他参数，但以命令行里的 `mode: full` 为准。
+配置文件就是当前生成命令的参数对象，目前不做命令名映射；如果写入 `gen`、`commands`、`logger` 等非命令行参数字段，会被直接忽略。默认会自动读取当前目录下的 `kabu.config.mjs`、`kabu.config.js`、`kabu.config.cjs` 或 `kabu.config.json`。使用 `-c, --config <file>` 可以指定配置文件。执行时命令行参数优先，配置文件参数次之，例如 `kabu -c ./kabu.config.mjs --mode full` 会使用配置文件里的其他参数，但以命令行里的 `mode: full` 为准。
 
 运行完整模拟案例：
 
@@ -56,13 +56,13 @@ pnpm build
 
 ```bash
 pnpm link --global
-kabu gen --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
+kabu --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
 ```
 
 ## 命令
 
 ```bash
-kabu gen [inputDir] --file-header <code> [options]
+kabu [inputDir] --file-header <code> [options]
 ```
 
 参数：
@@ -84,7 +84,7 @@ kabu gen [inputDir] --file-header <code> [options]
 `rewrite` 按传入顺序匹配，命中第一条后停止：
 
 ```bash
-kabu gen ./openapi --baseline-dir ./openapi-baseline --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" --rewrite /a/b=/c/a/c --rewrite /a=/c/a/b
+kabu ./openapi --baseline-dir ./openapi-baseline --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" --rewrite /a/b=/c/a/c --rewrite /a=/c/a/b
 ```
 
 ## 项目结构

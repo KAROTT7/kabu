@@ -1,6 +1,6 @@
 # kabu 完整模拟案例
 
-这个目录提供一组可以直接复现的模拟 OpenAPI 输入和生成结果，用来展示 `kabu gen` 在前端业务模块中的完整输出形态。
+这个目录提供一组可以直接复现的模拟 OpenAPI 输入和生成结果，用来展示 `kabu` 在前端业务模块中的完整输出形态。
 
 ## 目录结构
 
@@ -10,9 +10,9 @@ example/
   openapi/
     product.openapi.json      模拟商品模块 OpenAPI 输入
   openapi-baseline/
-    product.openapi.json      由 kabu gen 生成的模块级 OpenAPI 基线
+    product.openapi.json      由 kabu 生成的模块级 OpenAPI 基线
   services/
-    product.ts                由 kabu gen 生成的接口文件
+    product.ts                由 kabu 生成的接口文件
   request.ts                  axios request 封装示例
   tsconfig.json              独立类型检查配置
 ```

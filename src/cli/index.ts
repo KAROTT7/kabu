@@ -28,14 +28,15 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
 export async function runCli(argv: string[] = process.argv): Promise<void> {
   const cli = createCli()
 
+  if (argv.slice(2).length === 0) {
+    cli.outputHelp()
+    return
+  }
+
   cli.parse(argv, { run: false })
   const actionResult = cli.runMatchedCommand()
 
   if (isPromiseLike(actionResult)) {
     await actionResult
-  }
-
-  if (argv.slice(2).length === 0) {
-    cli.outputHelp()
   }
 }

@@ -1,6 +1,6 @@
 # 生成策略
 
-本文档说明 `kabu gen` 的生成规则、优先级和边界。完整输入输出案例见 [生成案例](./examples.md)。
+本文档说明 `kabu` 的生成规则、优先级和边界。完整输入输出案例见 [生成案例](./examples.md)。
 
 ## 目标
 
@@ -11,7 +11,7 @@
 
 ## 输入文件
 
-`kabu gen` 会递归扫描输入目录下所有 `*.openapi.json` 文件。
+`kabu` 会递归扫描输入目录下所有 `*.openapi.json` 文件。
 
 默认会先按接口路径第一段拆分模块，并把模块级 OpenAPI 基线写入：
 
@@ -57,7 +57,7 @@ openapi-baseline/<module>.openapi.json
 
 ## 同步模式
 
-`kabu gen` 支持两种生成模式：
+`kabu` 支持两种生成模式：
 
 - `update`：默认模式。把本次导入的接口片段合并进模块基线，再从受影响的模块基线文件生成对应 `.ts`
 - `full`：先清空基线目录和输出目录，再把当前输入目录作为完整事实来源重新生成
@@ -87,7 +87,7 @@ import request from '@/request'
 
 ## 配置文件
 
-`kabu gen` 支持通过配置文件提供命令参数。默认会尝试读取当前目录下的以下文件：
+`kabu` 支持通过配置文件提供命令参数。默认会尝试读取当前目录下的以下文件：
 
 ```text
 kabu.config.mjs
@@ -99,10 +99,10 @@ kabu.config.json
 也可以通过 `-c, --config <file>` 指定配置文件：
 
 ```bash
-kabu gen -c ./kabu.config.mjs
+kabu -c ./kabu.config.mjs
 ```
 
-配置文件直接导出 `gen` 命令的参数对象，目前不做命令名映射：
+配置文件直接导出当前生成命令的参数对象，目前不做命令名映射：
 
 ```js
 import { defineConfig } from 'kabu'
@@ -133,7 +133,7 @@ export default defineConfig({
 命令行参数 > 配置文件参数 > 生成器默认值
 ```
 
-例如配置文件里写了 `mode: 'update'`，命令行执行 `kabu gen -c ./kabu.config.mjs --mode full` 时会以 `full` 为准。`rewrite`、`pathRewrites`、`rewritePrefix` 也遵循同样规则：只要命令行传入 `--rewrite`，就会覆盖配置文件里的路径重写配置。
+例如配置文件里写了 `mode: 'update'`，命令行执行 `kabu -c ./kabu.config.mjs --mode full` 时会以 `full` 为准。`rewrite`、`pathRewrites`、`rewritePrefix` 也遵循同样规则：只要命令行传入 `--rewrite`，就会覆盖配置文件里的路径重写配置。
 
 ## 接口方法选择
 
@@ -203,7 +203,7 @@ GET /member/user_list -> getMemberUserList
 命令行可重复传入：
 
 ```bash
-kabu gen ./openapi \
+kabu ./openapi \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" \
   --rewrite /a/b=/c/a/c \
   --rewrite /a=/c/a/b

@@ -98,7 +98,7 @@ describe('config file', () => {
       rewrite: '/product=/api/config'
     })
 
-    await runCli(['node', 'kabu', 'gen', '-c', configFile])
+    await runCli(['node', 'kabu', '-c', configFile])
 
     const generated = fs.readFileSync(path.join(root, 'services', 'product.ts'), 'utf8')
     expect(generated).toContain('`/api/config/item/${id}`')
@@ -120,7 +120,6 @@ describe('config file', () => {
     await runCli([
       'node',
       'kabu',
-      'gen',
       '-c',
       configFile,
       '--output-dir',

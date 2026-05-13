@@ -1,6 +1,6 @@
 # 生成案例
 
-本文档提供 `kabu gen` 的常见输入输出案例。规则说明见 [生成策略](./strategy.md)。可复现完整模拟案例见 [example](../example/README.md)。
+本文档提供 `kabu` 的常见输入输出案例。规则说明见 [生成策略](./strategy.md)。可复现完整模拟案例见 [example](../example/README.md)。
 
 为了避免混淆，本文档说明中会区分以下类型角色：
 
@@ -326,7 +326,7 @@ export function deleteMemberUserById(
 命令：
 
 ```bash
-kabu gen ./openapi \
+kabu ./openapi \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'" \
   --rewrite /a/b=/c/a/c \
   --rewrite /a=/c/a/b
@@ -341,7 +341,7 @@ kabu gen ./openapi \
 
 ## 配置文件
 
-可以把 `gen` 命令参数写入配置文件：
+可以把生成命令参数写入配置文件：
 
 ```js
 // kabu.config.mjs
@@ -357,13 +357,13 @@ export default {
 执行：
 
 ```bash
-kabu gen -c ./kabu.config.mjs
+kabu -c ./kabu.config.mjs
 ```
 
 如果同时传入命令行参数，命令行参数优先：
 
 ```bash
-kabu gen -c ./kabu.config.mjs --mode full --rewrite /product=/admin/product
+kabu -c ./kabu.config.mjs --mode full --rewrite /product=/admin/product
 ```
 
 上述命令会复用配置文件里的输入、输出、文件头等参数，但 `mode` 和 `rewrite` 使用命令行传入的值。
@@ -409,7 +409,7 @@ product.ts
 如果传入：
 
 ```bash
-kabu gen ./openapi \
+kabu ./openapi \
   --mode full \
   --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'"
 ```

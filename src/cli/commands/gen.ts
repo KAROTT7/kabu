@@ -49,8 +49,7 @@ function mergeGenOptions(
 
 export function registerGenCommand(cli: CAC): void {
   cli
-    .command('gen [inputDir]', 'Generate TypeScript services from OpenAPI JSON files')
-    .alias('gen-services')
+    .command('[inputDir]', 'Generate TypeScript services from OpenAPI JSON files')
     .usage('[inputDir] --file-header <code> [options]')
     .option('-c, --config <file>', 'Use specified config file')
     .option('--input-dir <dir>', 'Directory to scan for *.openapi.json files')
@@ -59,10 +58,10 @@ export function registerGenCommand(cli: CAC): void {
     .option('--file-header <code>', 'Code inserted at the top of generated files')
     .option('--mode <mode>', 'Generate mode: update or full')
     .option('--rewrite <from=to>', 'Rewrite request path prefix; can be repeated')
-    .example(`kabu gen -c ./kabu.config.mjs`)
-    .example(`kabu gen --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --file-header "import type { AxiosRequestConfig } from 'axios'\\nimport request from '@/request'"`)
-    .example(`kabu gen ./openapi --baseline-dir ./openapi-baseline --output-dir ./src/services --mode full --file-header "import type { AxiosRequestConfig } from 'axios'\\nimport request from '@/request'"`)
-    .example(`kabu gen ./openapi --baseline-dir ./openapi-baseline --file-header "import type { AxiosRequestConfig } from 'axios'\\nimport request from '@/request'" --rewrite /a/b=/c/a/c --rewrite /a=/c/a/b`)
+    .example(`kabu -c ./kabu.config.mjs`)
+    .example(`kabu --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline --output-dir ./src/services --file-header "import type { AxiosRequestConfig } from 'axios'\\nimport request from '@/request'"`)
+    .example(`kabu ./openapi --baseline-dir ./openapi-baseline --output-dir ./src/services --mode full --file-header "import type { AxiosRequestConfig } from 'axios'\\nimport request from '@/request'"`)
+    .example(`kabu ./openapi --baseline-dir ./openapi-baseline --file-header "import type { AxiosRequestConfig } from 'axios'\\nimport request from '@/request'" --rewrite /a/b=/c/a/c --rewrite /a=/c/a/b`)
     .action(async (inputDir: string | undefined, options: GenCommandOptions) => {
       try {
         const loadedConfig = await loadConfigFile(options.config)
