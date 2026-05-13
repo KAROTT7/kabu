@@ -149,3 +149,22 @@ export function emitSchemaType(name: string, schema: any, context: TsContext): s
 
   return [`export type ${name} = ${schemaToTs(schema, context)}`, '']
 }
+
+export function emitGenericApiResultType(name: string, schema: any, context: TsContext): string[] {
+  const lines = [`export interface ${name}<T> {`]
+  const props: Record<string, any> = schema?.properties || {}
+  const required = new Set(schema?.required || [])
+
+  for (const [key, value] of Object.entries(props)) {
+    const desc = (value.description || '').replace(/\n+/g, ' ').trim()
+    if (desc) lines.push(`  /** ${desc} */`)
+    const tsKey = tsObjectKey(key)
+    const optional = required.has(key) ? '' : '?'
+    const tsType = key === 'data' ? 'T' : schemaToTs(value, context)
+    lines.push(`  ${tsKey}${optional}: ${tsType}`)
+  }
+
+  lines.push('}')
+  lines.push('')
+  return lines
+}

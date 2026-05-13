@@ -1,7 +1,7 @@
 import type { GenerateServicesOptions, SchemaMap } from './types.js'
 import { collectOperations, renderOperationBlock } from './render-operation.js'
 import { normalizeRewriteRules } from './rewrite-rules.js'
-import { emitSchemaType } from './schema-to-ts.js'
+import { emitGenericApiResultType, emitSchemaType } from './schema-to-ts.js'
 
 export { operationName } from './naming.js'
 export { schemaToTs } from './schema-to-ts.js'
@@ -26,9 +26,14 @@ export function generateFromSpec(spec: any, moduleName: string, options: Partial
   const usedRefs = new Set<string>()
   const context = { collectRef: (name: string) => usedRefs.add(name) }
   const functionNames = new Map<string, string>()
+  const helperSchemas = new Map<string, any>()
   const operationBlocks = operations.map(operation => {
-    return renderOperationBlock(operation, schemaMap, context, pathRewrites, functionNames)
+    return renderOperationBlock(operation, schemaMap, context, pathRewrites, helperSchemas, functionNames)
   })
+
+  for (const [name, schema] of helperSchemas) {
+    lines.push(...emitGenericApiResultType(name, schema, context))
+  }
 
   const emitted = new Set<string>()
   const queue = [...usedRefs]

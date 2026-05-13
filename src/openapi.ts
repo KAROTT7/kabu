@@ -2,6 +2,8 @@ import fs from 'node:fs'
 import type { SchemaMap, SchemaRenderer, TsContext } from './types.js'
 import { pathParamName } from './naming.js'
 
+export const API_RESULT_TYPE_NAME = 'ApiResult'
+
 export function readJSON(filePath: string): any {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'))
 }
@@ -34,6 +36,37 @@ export function resolveResponseDataType(
   }
 
   return renderer.schemaToTs(schema, context)
+}
+
+export function resolveResponseRawType(schema: any, context: TsContext, renderer: SchemaRenderer): string {
+  if (!schema) return 'unknown'
+  return renderer.schemaToTs(schema, context)
+}
+
+export function resolveGenericApiResultSchema(schema: any, schemaMap: SchemaMap): any {
+  const resolved = resolveSchemaRef(schema, schemaMap) || schema
+  if (!resolved || typeof resolved !== 'object') return null
+
+  const props = resolved.properties
+  if (!props || typeof props !== 'object' || resolved.additionalProperties) {
+    return null
+  }
+
+  const keys = Object.keys(props)
+  if (!keys.includes('code') || !keys.includes('data')) {
+    return null
+  }
+
+  if (!keys.includes('message') && !keys.includes('msg')) {
+    return null
+  }
+
+  const allowedKeys = new Set(['code', 'message', 'msg', 'data'])
+  if (keys.some(key => !allowedKeys.has(key))) {
+    return null
+  }
+
+  return resolved
 }
 
 export function getJsonSchemaFromContent(content: any): any {

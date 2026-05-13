@@ -3,6 +3,12 @@ import request from '../request'
 
 /** 模拟商品服务接口（由 OpenAPI 自动提取） */
 
+export interface ApiResult<T> {
+  code: number
+  message: string
+  data: T
+}
+
 export interface ProductConfig {
   /** 是否开启商品模块 */
   enabled: boolean
@@ -131,8 +137,8 @@ export type GetProductCatalogConfigResponse = ProductConfig
  * 获取商品配置
  * GET /api/product/catalog/config
  */
-export function getProductCatalogConfig(axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductCatalogConfigResponse> {
-  return request.get<GetProductCatalogConfigResponse, GetProductCatalogConfigResponse>(`/api/product/catalog/config`, axiosRequestConfig)
+export function getProductCatalogConfig(axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductCatalogConfigResponse | undefined> {
+  return request.get<GetProductCatalogConfigResponse, ApiResult<GetProductCatalogConfigResponse>>(`/api/product/catalog/config`, axiosRequestConfig)
 }
 
 export type PostProductCatalogSyncResponse = SyncTask
@@ -141,8 +147,8 @@ export type PostProductCatalogSyncResponse = SyncTask
  * 同步商品目录
  * POST /api/product/catalog/sync
  */
-export function postProductCatalogSync(axiosRequestConfig?: AxiosRequestConfig): Promise<PostProductCatalogSyncResponse> {
-  return request.post<PostProductCatalogSyncResponse, PostProductCatalogSyncResponse>(`/api/product/catalog/sync`, undefined, axiosRequestConfig)
+export function postProductCatalogSync(axiosRequestConfig?: AxiosRequestConfig): Promise<PostProductCatalogSyncResponse | undefined> {
+  return request.post<PostProductCatalogSyncResponse, ApiResult<PostProductCatalogSyncResponse>>(`/api/product/catalog/sync`, undefined, axiosRequestConfig)
 }
 
 export type GetProductItemByIdResponse = ProductDetail
@@ -151,8 +157,8 @@ export type GetProductItemByIdResponse = ProductDetail
  * 查询商品详情
  * GET /api/product/item/{id}
  */
-export function getProductItemById(id: string | number, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdResponse> {
-  return request.get<GetProductItemByIdResponse, GetProductItemByIdResponse>(`/api/product/item/${id}`, axiosRequestConfig)
+export function getProductItemById(id: string | number, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdResponse | undefined> {
+  return request.get<GetProductItemByIdResponse, ApiResult<GetProductItemByIdResponse>>(`/api/product/item/${id}`, axiosRequestConfig)
 }
 
 export type DeleteProductItemByIdBody = DeleteProductRequest
@@ -163,8 +169,8 @@ export type DeleteProductItemByIdResponse = boolean
  * 删除商品并记录原因
  * DELETE /api/product/item/{id}
  */
-export function deleteProductItemById(id: string | number, data: DeleteProductItemByIdBody, axiosRequestConfig?: AxiosRequestConfig<DeleteProductItemByIdBody>): Promise<DeleteProductItemByIdResponse> {
-  return request.delete<DeleteProductItemByIdResponse, DeleteProductItemByIdResponse, DeleteProductItemByIdBody>(`/api/product/item/${id}`, { ...axiosRequestConfig, data })
+export function deleteProductItemById(id: string | number, data: DeleteProductItemByIdBody, axiosRequestConfig?: AxiosRequestConfig<DeleteProductItemByIdBody>): Promise<DeleteProductItemByIdResponse | undefined> {
+  return request.delete<DeleteProductItemByIdResponse, ApiResult<DeleteProductItemByIdResponse>, DeleteProductItemByIdBody>(`/api/product/item/${id}`, { ...axiosRequestConfig, data })
 }
 
 export interface GetProductItemByIdLogsParams {
@@ -180,8 +186,8 @@ export type GetProductItemByIdLogsResponse = ProductLog[]
  * 查询商品操作日志
  * GET /api/product/item/{id}/logs
  */
-export function getProductItemByIdLogs(id: string | number, params: GetProductItemByIdLogsParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdLogsResponse> {
-  return request.get<GetProductItemByIdLogsResponse, GetProductItemByIdLogsResponse>(`/api/product/item/${id}/logs`, { ...axiosRequestConfig, params })
+export function getProductItemByIdLogs(id: string | number, params: GetProductItemByIdLogsParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemByIdLogsResponse | undefined> {
+  return request.get<GetProductItemByIdLogsResponse, ApiResult<GetProductItemByIdLogsResponse>>(`/api/product/item/${id}/logs`, { ...axiosRequestConfig, params })
 }
 
 export type PutProductItemByIdPriceBody = UpdateProductPriceRequest
@@ -192,8 +198,8 @@ export type PutProductItemByIdPriceResponse = ProductDetail
  * 修改商品价格
  * PUT /api/product/item/{id}/price
  */
-export function putProductItemByIdPrice(id: string | number, data: PutProductItemByIdPriceBody, axiosRequestConfig?: AxiosRequestConfig<PutProductItemByIdPriceBody>): Promise<PutProductItemByIdPriceResponse> {
-  return request.put<PutProductItemByIdPriceResponse, PutProductItemByIdPriceResponse, PutProductItemByIdPriceBody>(`/api/product/item/${id}/price`, data, axiosRequestConfig)
+export function putProductItemByIdPrice(id: string | number, data: PutProductItemByIdPriceBody, axiosRequestConfig?: AxiosRequestConfig<PutProductItemByIdPriceBody>): Promise<PutProductItemByIdPriceResponse | undefined> {
+  return request.put<PutProductItemByIdPriceResponse, ApiResult<PutProductItemByIdPriceResponse>, PutProductItemByIdPriceBody>(`/api/product/item/${id}/price`, data, axiosRequestConfig)
 }
 
 export interface PatchProductItemByIdStatusParams {
@@ -209,8 +215,8 @@ export type PatchProductItemByIdStatusResponse = ProductDetail
  * 修改商品状态
  * PATCH /api/product/item/{id}/status
  */
-export function patchProductItemByIdStatus(id: string | number, params: PatchProductItemByIdStatusParams, data: PatchProductItemByIdStatusBody, axiosRequestConfig?: AxiosRequestConfig<PatchProductItemByIdStatusBody>): Promise<PatchProductItemByIdStatusResponse> {
-  return request.patch<PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusResponse, PatchProductItemByIdStatusBody>(`/api/product/item/${id}/status`, data, { ...axiosRequestConfig, params })
+export function patchProductItemByIdStatus(id: string | number, params: PatchProductItemByIdStatusParams, data: PatchProductItemByIdStatusBody, axiosRequestConfig?: AxiosRequestConfig<PatchProductItemByIdStatusBody>): Promise<PatchProductItemByIdStatusResponse | undefined> {
+  return request.patch<PatchProductItemByIdStatusResponse, ApiResult<PatchProductItemByIdStatusResponse>, PatchProductItemByIdStatusBody>(`/api/product/item/${id}/status`, data, { ...axiosRequestConfig, params })
 }
 
 export type PostProductItemCreateBody = CreateProductRequest
@@ -221,8 +227,8 @@ export type PostProductItemCreateResponse = ProductRecord
  * 创建商品
  * POST /api/product/item/create
  */
-export function postProductItemCreate(data: PostProductItemCreateBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemCreateBody>): Promise<PostProductItemCreateResponse> {
-  return request.post<PostProductItemCreateResponse, PostProductItemCreateResponse, PostProductItemCreateBody>(`/api/product/item/create`, data, axiosRequestConfig)
+export function postProductItemCreate(data: PostProductItemCreateBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemCreateBody>): Promise<PostProductItemCreateResponse | undefined> {
+  return request.post<PostProductItemCreateResponse, ApiResult<PostProductItemCreateResponse>, PostProductItemCreateBody>(`/api/product/item/create`, data, axiosRequestConfig)
 }
 
 export interface DeleteProductItemDeleteParams {
@@ -238,8 +244,8 @@ export type DeleteProductItemDeleteResponse = boolean
  * 按查询参数删除商品
  * DELETE /api/product/item/delete
  */
-export function deleteProductItemDelete(params: DeleteProductItemDeleteParams, axiosRequestConfig?: AxiosRequestConfig): Promise<DeleteProductItemDeleteResponse> {
-  return request.delete<DeleteProductItemDeleteResponse, DeleteProductItemDeleteResponse>(`/api/product/item/delete`, { ...axiosRequestConfig, params })
+export function deleteProductItemDelete(params: DeleteProductItemDeleteParams, axiosRequestConfig?: AxiosRequestConfig): Promise<DeleteProductItemDeleteResponse | undefined> {
+  return request.delete<DeleteProductItemDeleteResponse, ApiResult<DeleteProductItemDeleteResponse>>(`/api/product/item/delete`, { ...axiosRequestConfig, params })
 }
 
 export interface PostProductItemExportParams {
@@ -255,8 +261,8 @@ export type PostProductItemExportResponse = ExportTask
  * 导出商品
  * POST /api/product/item/export
  */
-export function postProductItemExport(params: PostProductItemExportParams, data: PostProductItemExportBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemExportBody>): Promise<PostProductItemExportResponse> {
-  return request.post<PostProductItemExportResponse, PostProductItemExportResponse, PostProductItemExportBody>(`/api/product/item/export`, data, { ...axiosRequestConfig, params })
+export function postProductItemExport(params: PostProductItemExportParams, data: PostProductItemExportBody, axiosRequestConfig?: AxiosRequestConfig<PostProductItemExportBody>): Promise<PostProductItemExportResponse | undefined> {
+  return request.post<PostProductItemExportResponse, ApiResult<PostProductItemExportResponse>, PostProductItemExportBody>(`/api/product/item/export`, data, { ...axiosRequestConfig, params })
 }
 
 export interface GetProductItemPageParams {
@@ -276,7 +282,7 @@ export type GetProductItemPageResponse = ProductPage
  * 分页查询商品
  * GET /api/product/item/page
  */
-export function getProductItemPage(params: GetProductItemPageParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemPageResponse> {
-  return request.get<GetProductItemPageResponse, GetProductItemPageResponse>(`/api/product/item/page`, { ...axiosRequestConfig, params })
+export function getProductItemPage(params: GetProductItemPageParams, axiosRequestConfig?: AxiosRequestConfig): Promise<GetProductItemPageResponse | undefined> {
+  return request.get<GetProductItemPageResponse, ApiResult<GetProductItemPageResponse>>(`/api/product/item/page`, { ...axiosRequestConfig, params })
 }
 

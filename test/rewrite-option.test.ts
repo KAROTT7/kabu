@@ -73,6 +73,8 @@ describe('rewrite option', () => {
 
     expect(code).toContain('GET /api/product/item/{id}')
     expect(code).toContain('`/api/product/item/${id}`')
+    expect(code).toContain('): Promise<GetProductItemByIdResponse | undefined> {')
+    expect(code).toContain('request.get<GetProductItemByIdResponse, { data?: string }>')
   })
 
   it('keeps rewritePrefix compatibility in render output', () => {

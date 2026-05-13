@@ -253,6 +253,7 @@ getTradeOrderPage    -> GetTradeOrderPageResponse
 - 如果响应 schema 是对象，并且顶层存在 `data` 字段，则响应类型使用 `data` 字段类型。
 - 如果响应 schema 是 `$ref`，并且引用对象顶层存在 `data` 字段，也会使用 `data` 字段类型。
 - 如果不存在顶层 `data` 字段，则使用完整响应 schema 类型。
+- 常见接口响应模型如 `{ code, msg, data }` 或 `{ code, message, data }` 中，`code` 和 `msg/message` 通常由响应拦截器处理；生成函数的返回值只暴露页面真正使用的业务 `data` 类型。
 
 ## Schema 转换策略
 
@@ -347,44 +348,45 @@ function api(data, axiosRequestConfig?)
 function api(axiosRequestConfig?)
 ```
 
-说明中的泛型占位符会区分请求体和响应数据：
+说明中的泛型占位符会区分最终业务返回值、原始响应包装和请求体：
 
 ```ts
-request.get<ResponseData, ResolvedData>(url, config)
-request.post<ResponseData, ResolvedData, RequestBody>(url, data, config)
+request.get<ResolvedData, RawResponse>(url, config)
+request.post<ResolvedData, RawResponse, RequestBody>(url, data, config)
 ```
 
-这里的 `ResponseData`、`ResolvedData`、`RequestBody` 是说明用的类型角色，不代表真实生成的固定类型名。
+这里的 `ResolvedData`、`RawResponse`、`RequestBody` 是说明用的类型角色，不代表真实生成的固定类型名。
 
-以 axios v1 的方法签名为参考：
+这里的 `request` 指的是项目里的 axios 风格封装，而不是直接使用原始 `AxiosInstance` 默认泛型顺序。当前约定是：
 
 ```ts
-get<T = any, R = AxiosResponse<T>, D = any>(url, config): Promise<R>
-post<T = any, R = AxiosResponse<T>, D = any>(url, data, config): Promise<R>
+get<ResolvedData = any, RawResponse = unknown>(url, config): Promise<ResolvedData | undefined>
+post<ResolvedData = any, RawResponse = unknown, RequestBody = any>(url, data, config): Promise<ResolvedData | undefined>
 ```
 
 三个泛型的含义是：
 
-- `T`：`ResponseData`，响应 data 的类型
-- `R`：`ResolvedData`，整个请求 Promise resolve 的类型
-- `D`：`RequestBody`，请求体 data 的类型
+- 第一个泛型：`ResolvedData`，页面真正消费的业务数据类型
+- 第二个泛型：`RawResponse`，接口原始响应体类型，例如 `{ code, msg, data }`
+- 第三个泛型：`RequestBody`，请求体 `data` 的类型；不会用它表达 `params` 查询参数
 
-`kabu` 默认假设项目使用的是 axios 风格 request 封装，并且响应拦截器已经把 `AxiosResponse<T>` 解包成业务响应值 `T`。因此生成：
+`kabu` 默认假设项目使用的是 axios 风格 request 封装，并且响应拦截器已经把接口响应包装对象解包成业务响应值 `ResolvedData` 或 `undefined`。因此生成：
 
 ```ts
-request.get<ResponseData, ResponseData>(url, config)
-request.post<ResponseData, ResponseData, RequestBody>(url, data, config)
+request.get<ResponseData, RawResponse>(url, config)
+request.post<ResponseData, RawResponse, RequestBody>(url, data, config)
 ```
 
 它表示：
 
-- 响应 data 类型是 `ResponseData`
-- 函数最终 resolve 的类型也是 `ResponseData`
-- 对 `POST/PUT/PATCH`，请求体类型是 `RequestBody`
+- 第一个泛型表达页面真正拿到的 `ResponseData`
+- 第二个泛型表达接口原始响应包装 `RawResponse`
+- 函数最终 resolve 的类型仍然是 `ResponseData | undefined`
+- 对 `POST/PUT/PATCH`，请求体 `data` 类型是 `RequestBody`
 
-在真实生成代码中，`ResponseData` 会替换成具体的响应数据类型，例如 `GetTradeOrderPageResponse`；`RequestBody` 会替换成具体的请求体类型，例如 `PostTradeOrderCreateBody`。
+生成函数返回 `Promise<ResponseData | undefined>`。当业务码表示成功时，响应拦截器返回 `data`；当业务码表示失败时，响应拦截器可以统一提示 `msg/message` 并返回 `undefined`。
 
-如果直接使用原始 axios，不经过响应解包，那么第二个泛型通常应该是 `AxiosResponse<ResponseData>`，函数返回值也会是 `Promise<AxiosResponse<ResponseData>>`。这不是 `kabu` 当前默认生成策略。
+在真实生成代码中，`ResponseData` 会替换成具体的响应 `data` 类型，例如 `GetTradeOrderPageResponse`；`RawResponse` 会替换成生成器归一化后的原始响应包装类型，例如 `ApiResult<GetTradeOrderPageResponse>`；`RequestBody` 会替换成具体的请求体类型，例如 `PostTradeOrderCreateBody`。
 
 ## 方法矩阵
 

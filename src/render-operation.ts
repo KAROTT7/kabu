@@ -1,5 +1,13 @@
 import type { RewriteRule, SchemaMap, TsContext } from './types.js'
-import { getRequestSchema, getResponseSchema, resolvePathParams, resolveResponseDataType } from './openapi.js'
+import {
+  API_RESULT_TYPE_NAME,
+  getRequestSchema,
+  getResponseSchema,
+  resolveGenericApiResultSchema,
+  resolvePathParams,
+  resolveResponseDataType,
+  resolveResponseRawType
+} from './openapi.js'
 import { rewritePath } from './rewrite-rules.js'
 import { upperFirst, operationName } from './naming.js'
 import { schemaToTs } from './schema-to-ts.js'
@@ -78,12 +86,16 @@ function axiosConfigExpression(baseName: string, entries: Array<[string, string]
   return `{ ...${baseName}, ${merged} }`
 }
 
-function responseOnlyGenerics(responseType: string): string {
-  return `<${responseType}, ${responseType}>`
+function responseOnlyGenerics(responseType: string, rawResponseType: string): string {
+  return `<${responseType}, ${rawResponseType}>`
 }
 
-function responseBodyGenerics(responseType: string, bodyType: string): string {
-  return `<${responseType}, ${responseType}, ${bodyType}>`
+function responseBodyGenerics(responseType: string, rawResponseType: string, bodyType: string): string {
+  return `<${responseType}, ${rawResponseType}, ${bodyType}>`
+}
+
+function responseResolvedType(responseType: string): string {
+  return `${responseType} | undefined`
 }
 
 function pathArgumentNameFallback(value: unknown): string {
@@ -158,6 +170,7 @@ export function renderOperationBlock(
   schemaMap: SchemaMap,
   context: TsContext,
   pathRewrites: RewriteRule[],
+  helperSchemas: Map<string, any>,
   functionNames: Map<string, string>
 ): string[] {
   const { url, method, detail } = operation
@@ -180,6 +193,7 @@ export function renderOperationBlock(
   const paramsType = `${upperFirst(fnName)}Params`
   const bodyType = `${upperFirst(fnName)}Body`
   const responseType = `${upperFirst(fnName)}Response`
+  const genericApiResultSchema = resolveGenericApiResultSchema(responseSchema, schemaMap)
 
   const block: string[] = []
 
@@ -190,6 +204,14 @@ export function renderOperationBlock(
   if (requestSchema) {
     block.push(`export type ${bodyType} = ${schemaToTs(requestSchema, context)}`)
     block.push('')
+  }
+
+  const rawResponseType = genericApiResultSchema
+    ? `${API_RESULT_TYPE_NAME}<${responseType}>`
+    : resolveResponseRawType(responseSchema, context, { schemaToTs })
+
+  if (genericApiResultSchema) {
+    helperSchemas.set(API_RESULT_TYPE_NAME, genericApiResultSchema)
   }
 
   block.push(`export type ${responseType} = ${resolveResponseDataType(responseSchema, schemaMap, context, { schemaToTs })}`)
@@ -215,22 +237,22 @@ export function renderOperationBlock(
     ...(requestSchema ? [`data: ${bodyType}`] : []),
     requestSchema ? `axiosRequestConfig?: AxiosRequestConfig<${bodyType}>` : 'axiosRequestConfig?: AxiosRequestConfig'
   ]
-  const signature = `export function ${fnName}(${functionArguments.join(', ')}): Promise<${responseType}> {`
+  const signature = `export function ${fnName}(${functionArguments.join(', ')}): Promise<${responseResolvedType(responseType)}> {`
 
   if (requestSchema) {
     block.push(signature)
     if (hasDataArgument) {
-      block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, bodyType)}(${requestUrlLiteral}, data, ${configWithParams})`)
+      block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, rawResponseType, bodyType)}(${requestUrlLiteral}, data, ${configWithParams})`)
     } else {
-      block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, bodyType)}(${requestUrlLiteral}, ${configWithParamsAndData})`)
+      block.push(`  return request.${requestMethod}${responseBodyGenerics(responseType, rawResponseType, bodyType)}(${requestUrlLiteral}, ${configWithParamsAndData})`)
     }
     block.push('}')
   } else {
     block.push(signature)
     if (hasDataArgument) {
-      block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType)}(${requestUrlLiteral}, undefined, ${configWithParams})`)
+      block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType, rawResponseType)}(${requestUrlLiteral}, undefined, ${configWithParams})`)
     } else {
-      block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType)}(${requestUrlLiteral}, ${configWithParams})`)
+      block.push(`  return request.${requestMethod}${responseOnlyGenerics(responseType, rawResponseType)}(${requestUrlLiteral}, ${configWithParams})`)
     }
     block.push('}')
   }

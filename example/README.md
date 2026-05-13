@@ -17,7 +17,7 @@ example/
   tsconfig.json              独立类型检查配置
 ```
 
-`request.ts` 使用真实 `axios` 实例，并通过响应拦截器把 `AxiosResponse<T>` 解包为业务响应值 `T`，与生成代码中的 `request.get<ResponseData, ResponseData>` 策略保持一致。
+`request.ts` 使用真实 `axios` 实例，并通过响应拦截器把 `{ code, msg/message, data }` 解包为业务响应值 `data`。为了贴合生成代码，示例里把 `request.get` / `request.post` 等方法声明成 `request.get<ResponseData, RawResponse>` 这类“业务值在前、原始响应在后”的 axios 风格封装；业务码失败时会提示错误信息并返回 `undefined`。
 
 ## 安装
 
@@ -69,4 +69,4 @@ pnpm check
 | `DELETE` 携带请求体 | `DELETE /product/item/{id}` |
 | 文件头 | `--file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'"` |
 | 路径重写 | `--rewrite /product=/api/product` |
-| 响应数据解包 | 所有 `ApiResultXxx.data` 都会解包成业务响应类型 |
+| 响应数据解包 | 所有 `ApiResult<T>.data` 都会解包成业务响应类型 |

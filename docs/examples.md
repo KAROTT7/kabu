@@ -9,9 +9,12 @@
 | `RequestParams` | `path` 和 `query` 请求参数对象 | `GetTradeAfterSalePageParams` |
 | `RequestBody` | 请求体 data | `PostMemberUserCreateBody` |
 | `ResponseData` | 响应 data，也就是业务响应值 | `GetSystemAreaTreeResponse` |
-| `ResolvedData` | 请求最终 resolve 的值 | 默认等同于 `ResponseData` |
+| `RawResponse` | 接口原始响应包装对象 | `ApiResult<GetSystemAreaTreeResponse>` |
+| `ResolvedData` | 请求最终 resolve 的值 | 默认等同于 `ResponseData | undefined` |
 
-示例中的 `request.get<GetSystemAreaTreeResponse, GetSystemAreaTreeResponse>` 是 axios 风格封装的写法。第一个 `GetSystemAreaTreeResponse` 是 `ResponseData`，第二个是 `ResolvedData`。`kabu` 默认假设响应拦截器已经把 `AxiosResponse<T>` 解包成业务响应值 `T`，所以默认生成时 `ResolvedData` 与 `ResponseData` 使用同一个类型。
+示例中的 `request.get<GetSystemAreaTreeResponse, ApiResult<GetSystemAreaTreeResponse>>` 是项目里 axios 风格 request 封装的写法。第一个泛型是页面真正消费的业务值，第二个泛型是接口原始响应包装对象。`kabu` 默认假设响应拦截器已经把 `{ code, msg/message, data }` 解包成业务值 `data`；当业务码表示失败时，拦截器可以提示错误信息并返回 `undefined`，所以默认生成时 `ResolvedData` 仍然是 `ResponseData | undefined`。
+
+如果 OpenAPI 在 `components.schemas` 中定义了同构的包装类型，例如多个 `ApiResultXxx` 都是 `{ code, message/msg, data }`，生成代码会自动折叠成共享的泛型包装 `ApiResult<T>`，例如 `request.get<GetProductItemPageResponse, ApiResult<GetProductItemPageResponse>>`。
 
 ## 无参数且无请求体
 
@@ -26,8 +29,8 @@ GET /system/area/tree
 ```ts
 export function getSystemAreaTree(
   axiosRequestConfig?: AxiosRequestConfig
-): Promise<GetSystemAreaTreeResponse> {
-  return request.get<GetSystemAreaTreeResponse, GetSystemAreaTreeResponse>(
+): Promise<GetSystemAreaTreeResponse | undefined> {
+  return request.get<GetSystemAreaTreeResponse, ApiResult<GetSystemAreaTreeResponse>>(
     `/system/area/tree`,
     axiosRequestConfig
   )
@@ -47,8 +50,8 @@ POST /member/auth/logout
 ```ts
 export function postMemberAuthLogout(
   axiosRequestConfig?: AxiosRequestConfig
-): Promise<PostMemberAuthLogoutResponse> {
-  return request.post<PostMemberAuthLogoutResponse, PostMemberAuthLogoutResponse>(
+): Promise<PostMemberAuthLogoutResponse | undefined> {
+  return request.post<PostMemberAuthLogoutResponse, ApiResult<PostMemberAuthLogoutResponse>>(
     `/member/auth/logout`,
     undefined,
     axiosRequestConfig
@@ -75,8 +78,8 @@ export interface GetTradeAfterSalePageParams {
 export function getTradeAfterSalePage(
   params: GetTradeAfterSalePageParams,
   axiosRequestConfig?: AxiosRequestConfig
-): Promise<GetTradeAfterSalePageResponse> {
-  return request.get<GetTradeAfterSalePageResponse, GetTradeAfterSalePageResponse>(
+): Promise<GetTradeAfterSalePageResponse | undefined> {
+  return request.get<GetTradeAfterSalePageResponse, ApiResult<GetTradeAfterSalePageResponse>>(
     `/trade/after-sale/page`,
     {
       ...axiosRequestConfig,
@@ -100,8 +103,8 @@ GET /member/user/list/{id}
 export function getMemberUserListById(
   id: string | number,
   axiosRequestConfig?: AxiosRequestConfig
-): Promise<GetMemberUserListByIdResponse> {
-  return request.get<GetMemberUserListByIdResponse, GetMemberUserListByIdResponse>(
+): Promise<GetMemberUserListByIdResponse | undefined> {
+  return request.get<GetMemberUserListByIdResponse, ApiResult<GetMemberUserListByIdResponse>>(
     `/member/user/list/${id}`,
     axiosRequestConfig
   )
@@ -129,8 +132,8 @@ export function getMemberUserByIdOrders(
   id: string | number,
   params: GetMemberUserByIdOrdersParams,
   axiosRequestConfig?: AxiosRequestConfig
-): Promise<GetMemberUserByIdOrdersResponse> {
-  return request.get<GetMemberUserByIdOrdersResponse, GetMemberUserByIdOrdersResponse>(
+): Promise<GetMemberUserByIdOrdersResponse | undefined> {
+  return request.get<GetMemberUserByIdOrdersResponse, ApiResult<GetMemberUserByIdOrdersResponse>>(
     `/member/user/${id}/orders`,
     {
       ...axiosRequestConfig,
@@ -158,10 +161,10 @@ export type PostMemberUserCreateBody = {
 export function postMemberUserCreate(
   data: PostMemberUserCreateBody,
   axiosRequestConfig?: AxiosRequestConfig<PostMemberUserCreateBody>
-): Promise<PostMemberUserCreateResponse> {
+): Promise<PostMemberUserCreateResponse | undefined> {
   return request.post<
     PostMemberUserCreateResponse,
-    PostMemberUserCreateResponse,
+    ApiResult<PostMemberUserCreateResponse>,
     PostMemberUserCreateBody
   >(`/member/user/create`, data, axiosRequestConfig)
 }
@@ -190,10 +193,10 @@ export function postPromotionCouponTake(
   params: PostPromotionCouponTakeParams,
   data: PostPromotionCouponTakeBody,
   axiosRequestConfig?: AxiosRequestConfig<PostPromotionCouponTakeBody>
-): Promise<PostPromotionCouponTakeResponse> {
+): Promise<PostPromotionCouponTakeResponse | undefined> {
   return request.post<
     PostPromotionCouponTakeResponse,
-    PostPromotionCouponTakeResponse,
+    ApiResult<PostPromotionCouponTakeResponse>,
     PostPromotionCouponTakeBody
   >(`/promotion/coupon/take`, data, {
     ...axiosRequestConfig,
@@ -221,10 +224,10 @@ export function putMemberUserById(
   id: string | number,
   data: PutMemberUserByIdBody,
   axiosRequestConfig?: AxiosRequestConfig<PutMemberUserByIdBody>
-): Promise<PutMemberUserByIdResponse> {
+): Promise<PutMemberUserByIdResponse | undefined> {
   return request.put<
     PutMemberUserByIdResponse,
-    PutMemberUserByIdResponse,
+    ApiResult<PutMemberUserByIdResponse>,
     PutMemberUserByIdBody
   >(`/member/user/${id}`, data, axiosRequestConfig)
 }
@@ -254,10 +257,10 @@ export function patchMemberUserById(
   params: PatchMemberUserByIdParams,
   data: PatchMemberUserByIdBody,
   axiosRequestConfig?: AxiosRequestConfig<PatchMemberUserByIdBody>
-): Promise<PatchMemberUserByIdResponse> {
+): Promise<PatchMemberUserByIdResponse | undefined> {
   return request.patch<
     PatchMemberUserByIdResponse,
-    PatchMemberUserByIdResponse,
+    ApiResult<PatchMemberUserByIdResponse>,
     PatchMemberUserByIdBody
   >(`/member/user/${id}`, data, {
     ...axiosRequestConfig,
@@ -280,10 +283,10 @@ DELETE /trade/after-sale/cancel?id
 export function deleteTradeAfterSaleCancel(
   params: DeleteTradeAfterSaleCancelParams,
   axiosRequestConfig?: AxiosRequestConfig
-): Promise<DeleteTradeAfterSaleCancelResponse> {
+): Promise<DeleteTradeAfterSaleCancelResponse | undefined> {
   return request.delete<
     DeleteTradeAfterSaleCancelResponse,
-    DeleteTradeAfterSaleCancelResponse
+    ApiResult<DeleteTradeAfterSaleCancelResponse>
   >(`/trade/after-sale/cancel`, {
     ...axiosRequestConfig,
     params
@@ -306,10 +309,10 @@ export function deleteMemberUserById(
   id: string | number,
   data: DeleteMemberUserByIdBody,
   axiosRequestConfig?: AxiosRequestConfig<DeleteMemberUserByIdBody>
-): Promise<DeleteMemberUserByIdResponse> {
+): Promise<DeleteMemberUserByIdResponse | undefined> {
   return request.delete<
     DeleteMemberUserByIdResponse,
-    DeleteMemberUserByIdResponse,
+    ApiResult<DeleteMemberUserByIdResponse>,
     DeleteMemberUserByIdBody
   >(`/member/user/${id}`, {
     ...axiosRequestConfig,
@@ -407,4 +410,8 @@ OpenAPI 响应 schema：
 
 ```ts
 export type SomeResponse = string
+
+export function someApi(axiosRequestConfig?: AxiosRequestConfig): Promise<SomeResponse | undefined> {
+  return request.get<SomeResponse, ApiResult<SomeResponse>>(`/some/api`, axiosRequestConfig)
+}
 ```
