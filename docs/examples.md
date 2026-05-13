@@ -14,7 +14,19 @@
 
 示例中的 `request.get<GetSystemAreaTreeResponse, ApiResult<GetSystemAreaTreeResponse>>` 是项目里 axios 风格 request 封装的写法。第一个泛型是页面真正消费的业务值，第二个泛型是接口原始响应包装对象。`kabu` 默认假设响应拦截器已经把 `{ code, msg/message, data }` 解包成业务值 `data`；当业务码表示失败时，拦截器可以提示错误信息并返回 `undefined`，所以默认生成时 `ResolvedData` 仍然是 `ResponseData | undefined`。
 
-如果 OpenAPI 在 `components.schemas` 中定义了同构的包装类型，例如多个 `ApiResultXxx` 都是 `{ code, message/msg, data }`，生成代码会自动折叠成共享的泛型包装 `ApiResult<T>`，例如 `request.get<GetProductItemPageResponse, ApiResult<GetProductItemPageResponse>>`。
+如果 OpenAPI 在 `components.schemas` 中定义了同构的包装类型，例如多个 `ApiResultXxx` 都是 `{ code, message/msg, data }`，生成代码会自动折叠成共享的泛型包装 `ApiResult<T>`，并写入输出目录的 `interface.ts`。各模块文件会导入这个共享类型，例如 `request.get<GetProductItemPageResponse, ApiResult<GetProductItemPageResponse>>`。
+
+`interface.ts` 示例：
+
+```ts
+/** 通用接口类型（由 OpenAPI 自动提取） */
+
+export interface ApiResult<T> {
+  code: number
+  message: string
+  data: T
+}
+```
 
 ## 无参数且无请求体
 

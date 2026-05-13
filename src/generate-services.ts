@@ -1,10 +1,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { assertOpenApiSupported, readJSON } from './openapi.js'
+import { API_RESULT_TYPE_NAME, assertOpenApiSupported, readJSON } from './openapi.js'
 import { syncModuleSpecs } from './module-baseline.js'
-import { generateFromSpec } from './render-ts.js'
+import { generateFromSpecWithMeta, generateSharedTypes } from './render-ts.js'
 import { normalizeRewriteRules } from './rewrite-rules.js'
 import type { GenerateMode, GenerateResult, GenerateServicesOptions, NormalizedGenerateOptions } from './types.js'
+import type { SharedTypeEntry } from './render-ts.js'
 
 const ROOT = process.cwd()
 
@@ -158,19 +159,37 @@ export function generateServices(options: Partial<GenerateServicesOptions> = {})
   }
 
   const files: Array<{ input: string; output: string }> = []
+  const sharedTypes = new Map<string, SharedTypeEntry>()
 
   for (const moduleSpec of synced.moduleSpecs) {
     const outputPath = path.join(args.outputDir, `${moduleSpec.moduleName}.ts`)
-    const outputCode = generateFromSpec(moduleSpec.spec, moduleSpec.moduleName, {
+    const output = generateFromSpecWithMeta(moduleSpec.spec, moduleSpec.moduleName, {
       pathRewrites: args.pathRewrites,
-      fileHeader: args.fileHeader
+      fileHeader: args.fileHeader,
+      sharedTypeNames: [API_RESULT_TYPE_NAME],
+      sharedTypeImportPath: './interface'
     })
 
-    fs.writeFileSync(outputPath, outputCode, 'utf8')
+    for (const [name, schema] of output.helperSchemas) {
+      if (name === API_RESULT_TYPE_NAME && !sharedTypes.has(name)) {
+        sharedTypes.set(name, {
+          schema,
+          schemaMap: output.schemaMap
+        })
+      }
+    }
+
+    fs.writeFileSync(outputPath, output.code, 'utf8')
     files.push({ input: moduleSpec.filePath, output: outputPath })
     const relativeIn = path.relative(ROOT, moduleSpec.filePath)
     const relativeOut = path.relative(ROOT, outputPath)
     if (logger) logger.log(`[ok] ${relativeIn} -> ${relativeOut}`)
+  }
+
+  if (sharedTypes.size > 0) {
+    const outputPath = path.join(args.outputDir, 'interface.ts')
+    fs.writeFileSync(outputPath, generateSharedTypes(sharedTypes), 'utf8')
+    if (logger) logger.log(`[ok] shared -> ${path.relative(ROOT, outputPath)}`)
   }
 
   if (logger) logger.log('[done] services 生成完成')

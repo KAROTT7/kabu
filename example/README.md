@@ -12,6 +12,7 @@ example/
   openapi-baseline/
     product.openapi.json      由 kabu 生成的模块级 OpenAPI 基线
   services/
+    interface.ts              由 kabu 生成的通用接口类型
     product.ts                由 kabu 生成的接口文件
   request.ts                  axios request 封装示例
   tsconfig.json              独立类型检查配置
@@ -37,7 +38,7 @@ pnpm install
 pnpm gen
 ```
 
-生成结果会覆盖 `example/services/product.ts`。
+生成结果会覆盖 `example/services/product.ts`，并在检测到通用响应包装时生成 `example/services/interface.ts`。
 默认还会把模块级 OpenAPI 基线写入 `example/openapi-baseline/product.openapi.json`。
 
 如果希望以当前 `openapi/` 作为完整事实来源重新生成，可以执行：

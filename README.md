@@ -79,6 +79,8 @@ kabu [inputDir] --baseline-dir <dir> --output-dir <dir> --file-header <code> [op
 
 默认 `update` 会先把本次导入的接口按路径第一段聚合到 `openapi-baseline/*.openapi.json`，再从这些模块基线文件生成最终 `.ts`。同一路径同一方法会覆盖旧定义，本次未导出的旧接口会保留。
 
+如果 OpenAPI 中检测到 `{ code, message/msg, data }` 这类通用响应包装，生成器会把共享的 `ApiResult<T>` 写到输出目录的 `interface.ts`，业务模块通过 `import type { ApiResult } from './interface'` 复用。
+
 如果传入 `--mode full`，则会先清空基线目录和输出目录，再把当前输入目录作为完整事实来源重新生成。
 
 `rewrite` 按传入顺序匹配，命中第一条后停止：

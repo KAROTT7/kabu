@@ -54,6 +54,7 @@ openapi-baseline/<module>.openapi.json
 - 用户通过 `--file-header` 指定的文件头部代码
 - OpenAPI `components.schemas` 中被引用到的类型
 - 每个 operation 对应的请求参数类型、请求体类型、响应数据类型和请求函数
+- 如果检测到通用响应包装模型，例如 `{ code, message/msg, data }`，会额外生成 `interface.ts`，并把共享的 `ApiResult<T>` 放到其中；各模块文件通过 `import type { ApiResult } from './interface'` 复用它。
 
 ## 同步模式
 
@@ -308,6 +309,7 @@ getTradeOrderPage    -> GetTradeOrderPageResponse
 - 如果响应 schema 是 `$ref`，并且引用对象顶层存在 `data` 字段，也会使用 `data` 字段类型。
 - 如果不存在顶层 `data` 字段，则使用完整响应 schema 类型。
 - 常见接口响应模型如 `{ code, msg, data }` 或 `{ code, message, data }` 中，`code` 和 `msg/message` 通常由响应拦截器处理；生成函数的返回值只暴露页面真正使用的业务 `data` 类型。
+- 当 OpenAPI 中存在多个同构的响应包装类型，例如 `ApiResultProductDetail`、`ApiResultProductPage` 都是 `{ code, message/msg, data }`，生成器会把它们折叠成共享泛型 `ApiResult<T>`，写入输出目录的 `interface.ts`，模块文件只保留业务响应类型并引用这个共享包装类型。
 
 ## Schema 转换策略
 
@@ -440,7 +442,7 @@ request.post<ResponseData, RawResponse, RequestBody>(url, data, config)
 
 生成函数返回 `Promise<ResponseData | undefined>`。当业务码表示成功时，响应拦截器返回 `data`；当业务码表示失败时，响应拦截器可以统一提示 `msg/message` 并返回 `undefined`。
 
-在真实生成代码中，`ResponseData` 会替换成具体的响应 `data` 类型，例如 `GetTradeOrderPageResponse`；`RawResponse` 会替换成生成器归一化后的原始响应包装类型，例如 `ApiResult<GetTradeOrderPageResponse>`；`RequestBody` 会替换成具体的请求体类型，例如 `PostTradeOrderCreateBody`。
+在真实生成代码中，`ResponseData` 会替换成具体的响应 `data` 类型，例如 `GetTradeOrderPageResponse`；`RawResponse` 会替换成生成器归一化后的原始响应包装类型，例如 `ApiResult<GetTradeOrderPageResponse>`；`RequestBody` 会替换成具体的请求体类型，例如 `PostTradeOrderCreateBody`。如果检测到共享响应包装，`ApiResult<T>` 会生成在输出目录的 `interface.ts` 中。
 
 ## 方法矩阵
 

@@ -1,13 +1,8 @@
 import type { AxiosRequestConfig } from 'axios'
 import request from '../request'
+import type { ApiResult } from './interface'
 
 /** 模拟商品服务接口（由 OpenAPI 自动提取） */
-
-export interface ApiResult<T> {
-  code: number
-  message: string
-  data: T
-}
 
 export interface ProductConfig {
   /** 是否开启商品模块 */
