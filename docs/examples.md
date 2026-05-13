@@ -339,6 +339,35 @@ kabu gen ./openapi \
 /a/user   -> /c/a/b/user
 ```
 
+## 配置文件
+
+可以把 `gen` 命令参数写入配置文件：
+
+```js
+// kabu.config.mjs
+export default {
+  inputDir: './openapi',
+  baselineDir: './openapi-baseline',
+  outputDir: './services',
+  fileHeader: "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'",
+  rewrite: ['/product=/api/product']
+}
+```
+
+执行：
+
+```bash
+kabu gen -c ./kabu.config.mjs
+```
+
+如果同时传入命令行参数，命令行参数优先：
+
+```bash
+kabu gen -c ./kabu.config.mjs --mode full --rewrite /product=/admin/product
+```
+
+上述命令会复用配置文件里的输入、输出、文件头等参数，但 `mode` 和 `rewrite` 使用命令行传入的值。
+
 ## 增量同步
 
 第一次导入：

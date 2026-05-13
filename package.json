@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "description": "Generate TypeScript service functions from OpenAPI documents.",
   "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "bin": {
     "kabu": "./dist/src/bin/kabu.js"
   },

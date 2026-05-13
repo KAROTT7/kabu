@@ -39,6 +39,17 @@ export interface GenerateResult {
   files: Array<{ input: string; output: string }>
 }
 
+export interface KabuConfig extends Partial<Pick<GenerateServicesOptions, 'inputDir' | 'baselineDir' | 'outputDir' | 'fileHeader' | 'mode' | 'rewrite'>> {
+  [key: string]: unknown
+}
+
+export type KabuConfigExport = KabuConfig | (() => KabuConfig | Promise<KabuConfig>)
+
+export interface LoadedKabuConfig {
+  filePath: string | null
+  config: KabuConfig
+}
+
 export interface TsContext {
   collectRef(name: string): void
 }

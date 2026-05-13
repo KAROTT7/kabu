@@ -85,6 +85,56 @@ import request from '@/request'
 
 命令行中可以传入实际换行，也可以传入 `\n`，生成器会将 `\n` 转成换行。
 
+## 配置文件
+
+`kabu gen` 支持通过配置文件提供命令参数。默认会尝试读取当前目录下的以下文件：
+
+```text
+kabu.config.mjs
+kabu.config.js
+kabu.config.cjs
+kabu.config.json
+```
+
+也可以通过 `-c, --config <file>` 指定配置文件：
+
+```bash
+kabu gen -c ./kabu.config.mjs
+```
+
+配置文件直接导出 `gen` 命令的参数对象，目前不做命令名映射：
+
+```js
+import { defineConfig } from 'kabu'
+
+export default defineConfig({
+  inputDir: './openapi-fragments',
+  baselineDir: './openapi-baseline',
+  outputDir: './src/services',
+  fileHeader: "import type { AxiosRequestConfig } from 'axios'\nimport request from '@/request'",
+  rewrite: ['/product=/api/product']
+})
+```
+
+配置文件只读取当前命令行支持的参数字段：
+
+- `inputDir`
+- `baselineDir`
+- `outputDir`
+- `fileHeader`
+- `mode`
+- `rewrite`
+
+如果配置文件中出现 `gen`、`commands`、`logger`、`root`、`pathRewrites`、`rewritePrefix` 或其他非命令行参数字段，会被直接忽略。
+
+合并优先级为：
+
+```text
+命令行参数 > 配置文件参数 > 生成器默认值
+```
+
+例如配置文件里写了 `mode: 'update'`，命令行执行 `kabu gen -c ./kabu.config.mjs --mode full` 时会以 `full` 为准。`rewrite`、`pathRewrites`、`rewritePrefix` 也遵循同样规则：只要命令行传入 `--rewrite`，就会覆盖配置文件里的路径重写配置。
+
 ## 接口方法选择
 
 当前会生成以下 HTTP 方法：

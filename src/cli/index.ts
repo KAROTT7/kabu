@@ -21,10 +21,19 @@ export function createCli(): CAC {
   return cli
 }
 
-export function runCli(argv: string[] = process.argv): void {
+function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+  return Boolean(value) && typeof (value as PromiseLike<unknown>).then === 'function'
+}
+
+export async function runCli(argv: string[] = process.argv): Promise<void> {
   const cli = createCli()
 
-  cli.parse(argv)
+  cli.parse(argv, { run: false })
+  const actionResult = cli.runMatchedCommand()
+
+  if (isPromiseLike(actionResult)) {
+    await actionResult
+  }
 
   if (argv.slice(2).length === 0) {
     cli.outputHelp()
