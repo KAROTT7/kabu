@@ -1,14 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "lib": ["ES2022", "DOM"],
-    "strict": false,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true
-  },
-  "include": ["example/**/*.ts"],
-  "exclude": ["node_modules"]
+  "extends": "./example/tsconfig.json"
 }

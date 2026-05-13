@@ -23,8 +23,10 @@ pnpm dev gen --input-dir ./openapi-fragments --baseline-dir ./openapi-baseline -
 运行完整模拟案例：
 
 ```bash
-pnpm build
-node ./dist/src/bin/kabu.js gen ./example/openapi --baseline-dir ./openapi-baseline --output-dir ./example/services --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'" --rewrite /product=/api/product
+cd example
+pnpm install
+pnpm gen
+pnpm check
 ```
 
 构建 TypeScript：
@@ -75,9 +77,8 @@ src/cli/index.ts            CLI 初始化
 src/cli/commands/gen.ts     cac 命令注册
 src/index.ts                OpenAPI 生成核心公共导出
 src/*.ts                    OpenAPI 生成核心模块
-openapi-baseline/           模块级 OpenAPI 基线
 docs/strategy.md            生成规则
 docs/examples.md            生成案例
 example/                    可复现完整模拟案例
-tsconfig.example.json       example 类型检查配置
+tsconfig.example.json       example 类型检查兼容配置
 ```

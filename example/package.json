@@ -1,0 +1,20 @@
+{
+  "name": "kabu-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:kabu": "pnpm --dir .. build",
+    "gen": "pnpm run build:kabu && node ../dist/src/bin/kabu.js gen ./openapi --baseline-dir ./openapi-baseline --output-dir ./services --file-header \"import type { AxiosRequestConfig } from 'axios'\\nimport request from '../request'\" --rewrite /product=/api/product",
+    "gen:full": "pnpm run build:kabu && node ../dist/src/bin/kabu.js gen ./openapi --baseline-dir ./openapi-baseline --output-dir ./services --mode full --file-header \"import type { AxiosRequestConfig } from 'axios'\\nimport request from '../request'\" --rewrite /product=/api/product",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "axios": "^1.16.0"
+  },
+  "devDependencies": {
+    "kabu": "link:..",
+    "typescript": "^6.0.3"
+  },
+  "packageManager": "pnpm@10.18.1"
+}

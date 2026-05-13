@@ -6,30 +6,51 @@
 
 ```text
 example/
+  package.json              独立示例项目配置
   openapi/
     product.openapi.json      模拟商品模块 OpenAPI 输入
+  openapi-baseline/
+    product.openapi.json      由 kabu gen 生成的模块级 OpenAPI 基线
   services/
     product.ts                由 kabu gen 生成的接口文件
   request.ts                  axios request 封装示例
+  tsconfig.json              独立类型检查配置
 ```
 
 `request.ts` 使用真实 `axios` 实例，并通过响应拦截器把 `AxiosResponse<T>` 解包为业务响应值 `T`，与生成代码中的 `request.get<ResponseData, ResponseData>` 策略保持一致。
 
-## 复现命令
+## 安装
 
-在项目根目录执行：
+在 `example/` 目录执行：
 
 ```bash
-pnpm build
-node ./dist/src/bin/kabu.js gen ./example/openapi \
-  --baseline-dir ./openapi-baseline \
-  --output-dir ./example/services \
-  --file-header "import type { AxiosRequestConfig } from 'axios'\nimport request from '../request'" \
-  --rewrite /product=/api/product
+pnpm install
+```
+
+`example/package.json` 通过 `link:..` 安装当前仓库里的 `kabu`。生成脚本会先构建父级包，再调用构建后的 CLI。
+
+## 复现命令
+
+在 `example/` 目录执行：
+
+```bash
+pnpm gen
 ```
 
 生成结果会覆盖 `example/services/product.ts`。
-默认还会把模块级 OpenAPI 基线写入 `openapi-baseline/product.openapi.json`。
+默认还会把模块级 OpenAPI 基线写入 `example/openapi-baseline/product.openapi.json`。
+
+如果希望以当前 `openapi/` 作为完整事实来源重新生成，可以执行：
+
+```bash
+pnpm gen:full
+```
+
+类型检查：
+
+```bash
+pnpm check
+```
 
 ## 覆盖场景
 
